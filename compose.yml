@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:alpine
+    container_name: database
+    user: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: syntechnica
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: syntechnica
+    ports:
+      - "5432:5432"

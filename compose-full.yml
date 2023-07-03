@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: app
+    depends_on:
+      - database
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/syntechnica
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: syntechnica
+    ports:
+      - "8080:8080"
+
+  database:
+    image: postgres:alpine
+    container_name: database
+    user: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: syntechnica
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: syntechnica
+    ports:
+      - "5432:5432"

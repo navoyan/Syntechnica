@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:alpine:///syntechnica
+  test:
+    database:
+      replace: none

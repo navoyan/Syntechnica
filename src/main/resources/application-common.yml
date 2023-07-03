@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: syntechnica
+
+server:
+  servlet:
+    context-path: /v1
