@@ -11,7 +11,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.security.auth.x500.X500Principal;
@@ -31,9 +30,6 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Slf4j
 public class KeyStoreProvider {
-
-	@Value("CN=${app.name}")
-	private String applicationDN;
 
 	private final KeyStoreConfigurationProperties properties;
 
@@ -57,6 +53,18 @@ public class KeyStoreProvider {
 		return keyStore;
 	}
 
+	@SneakyThrows
+	public KeyPair generateRSAKeyPair(SecureRandom random) {
+		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA",
+				BouncyCastleProvider.PROVIDER_NAME);
+		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4), random);
+
+		return keyPairGenerator.generateKeyPair();
+	}
 
 
 	@SneakyThrows
@@ -89,19 +97,10 @@ public class KeyStoreProvider {
 	}
 
 	@SneakyThrows
-	private KeyPair generateRSAKeyPair(SecureRandom random) {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA",
-				BouncyCastleProvider.PROVIDER_NAME);
-		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4), random);
-
-		return keyPairGenerator.generateKeyPair();
-	}
-
-	@SneakyThrows
 	private X509Certificate createCertificate(PublicKey certificateKey, PrivateKey signingKey, SecureRandom random) {
 		BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
 
-		X500Principal issuerAndSubject = new X500Principal(applicationDN);
+		X500Principal issuerAndSubject = new X500Principal("CN=" + properties.getIssuer());
 
 		Instant now = Instant.now();
 		Date notBefore = Date.from(now);
