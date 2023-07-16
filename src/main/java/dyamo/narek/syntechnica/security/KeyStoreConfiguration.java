@@ -2,7 +2,6 @@ package dyamo.narek.syntechnica.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +10,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Configuration
-@Slf4j
 @RequiredArgsConstructor
 public class KeyStoreConfiguration {
 

@@ -9,6 +9,8 @@ import java.nio.file.Path;
 @Data
 public class KeyStoreConfigurationProperties {
 
+	private String issuer;
+
 	private Path path;
 
 	private String password;
