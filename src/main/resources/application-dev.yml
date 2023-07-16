@@ -3,3 +3,12 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+
+
+app:
+  data-storage:
+    path: ./syntechnica/data
+
+  security:
+    keystore:
+      password: syntechnica

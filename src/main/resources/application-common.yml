@@ -1,7 +1,17 @@
-spring:
-  application:
-    name: syntechnica
-
 server:
   servlet:
     context-path: /v1
+
+
+app:
+  name: syntechnica
+
+  data-storage:
+    internal-path: ${app.data-storage.path}/internal
+
+  security:
+    keystore:
+      path: ${app.data-storage.internal-path}/keyStore.p12
+      jwt-signing-key:
+        alias: jwtsigning
+        password: ${app.security.keystore.password}
