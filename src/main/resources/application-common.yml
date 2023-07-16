@@ -11,7 +11,15 @@ app:
 
   security:
     keystore:
-      path: ${app.data-storage.internal-path}/keyStore.p12
+      issuer: ${app.name}
+      path: ${app.data-storage.internal-path}/keystore.p12
       jwt-signing-key:
         alias: jwtsigning
         password: ${app.security.keystore.password}
+
+    auth:
+      jwt:
+        issuer: ${app.name}
+        expiration-time: 2h
+        claims:
+          authorities: authorities
