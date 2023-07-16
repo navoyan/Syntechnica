@@ -2,9 +2,6 @@ package dyamo.narek.syntechnica.security;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,17 +11,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 
+import static dyamo.narek.syntechnica.ConfigurationPropertiesBuilder.configProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {KeyStoreProvider.class, KeyStoreConfigurationProperties.class})
-@EnableConfigurationProperties
 class KeyStoreProviderTests {
 
-	@Autowired
-	KeyStoreConfigurationProperties keyStoreConfigurationProperties;
+	KeyStoreConfigurationProperties keyStoreConfigurationProperties = configProperties(KeyStoreConfigurationProperties.class);
 
-	@Autowired
-	KeyStoreProvider keyStoreProvider;
+	KeyStoreProvider keyStoreProvider = new KeyStoreProvider(keyStoreConfigurationProperties);
 
 
 	@Test
@@ -66,9 +60,12 @@ class KeyStoreProviderTests {
 
 
 	private Path keyStorePath(Path parent) {
-		Path result = parent.resolve("keyStore.p12");
-		keyStoreConfigurationProperties.setPath(result);
-		return result;
+		Path originalPath = keyStoreConfigurationProperties.getPath();
+
+		Path tempPath = parent.resolve(originalPath.getFileName());
+		keyStoreConfigurationProperties.setPath(tempPath);
+
+		return tempPath;
 	}
 
 }
