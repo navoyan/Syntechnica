@@ -28,8 +28,8 @@ class KeyStoreProviderTests {
 
 
 	@Test
-	void loadOrCreateKeyStore_shouldCreateKeyStore_whenNotFound(@TempDir Path parentDirectory) {
-		Path keyStorePath = keyStorePath(parentDirectory);
+	void loadOrCreateKeyStore_shouldCreateKeyStore_whenNotFound(@TempDir Path tempParentDirectory) {
+		Path keyStorePath = keyStorePath(tempParentDirectory);
 
 
 		keyStoreProvider.loadOrCreateKeyStore();
@@ -39,10 +39,10 @@ class KeyStoreProviderTests {
 	}
 
 	@Test
-	void loadOrCreateKeyStore_shouldLoadPreviouslyCreatedKeyStore_whenFound(@TempDir Path parentDirectory)
+	void loadOrCreateKeyStore_shouldLoadPreviouslyCreatedKeyStore_whenFound(@TempDir Path tempParentDirectory)
 			throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateEncodingException {
 
-		keyStorePath(parentDirectory);
+		keyStorePath(tempParentDirectory);
 		var jwtSigningKeyProperties = keyStoreConfigurationProperties.getJwtSigningKey();
 
 		KeyStore createdKeyStore = keyStoreProvider.loadOrCreateKeyStore();
