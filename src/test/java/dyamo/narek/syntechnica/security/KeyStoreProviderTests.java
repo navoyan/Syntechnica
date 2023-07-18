@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.security;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,9 +17,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class KeyStoreProviderTests {
 
-	KeyStoreConfigurationProperties keyStoreConfigurationProperties = configProperties(KeyStoreConfigurationProperties.class);
+	KeyStoreConfigurationProperties keyStoreConfigurationProperties;
 
-	KeyStoreProvider keyStoreProvider = new KeyStoreProvider(keyStoreConfigurationProperties);
+	KeyStoreProvider keyStoreProvider;
+
+
+	@BeforeEach
+	void beforeEach() {
+		keyStoreConfigurationProperties = configProperties(KeyStoreConfigurationProperties.class);
+		keyStoreProvider = new KeyStoreProvider(keyStoreConfigurationProperties);
+	}
 
 
 	@Test
