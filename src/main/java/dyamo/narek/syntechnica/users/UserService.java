@@ -4,6 +4,9 @@ import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityService;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
@@ -28,6 +32,7 @@ public class UserService {
 		return passwordEncoder.matches(rawPassword, user.getPassword());
 	}
 
+	@EventListener(ApplicationReadyEvent.class)
 	@Transactional
 	public void saveDefaultAdminUserIfNotExists() {
 		UserAuthority adminAuthority = userAuthorityService.findByType(UserAuthorityType.ADMIN)
@@ -41,6 +46,8 @@ public class UserService {
 		adminAuthority.getUsers().add(admin);
 
 		userRepository.save(admin);
+
+		log.info("Created default admin user");
 	}
 
 }
