@@ -1,4 +1,4 @@
-package dyamo.narek.syntechnica;
+package dyamo.narek.syntechnica.global;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
