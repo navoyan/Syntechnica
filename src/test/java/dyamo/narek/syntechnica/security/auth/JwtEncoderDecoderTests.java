@@ -10,18 +10,11 @@ import dyamo.narek.syntechnica.security.KeyStoreConfiguration;
 import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
 import dyamo.narek.syntechnica.security.KeyStoreProvider;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.test.context.ContextConfiguration;
 
-import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
@@ -38,9 +31,9 @@ import static org.assertj.core.api.Assertions.catchException;
 		webEnvironment = SpringBootTest.WebEnvironment.NONE,
 		classes = {
 				AuthConfiguration.class, KeyStoreConfiguration.class,
-				KeyStoreConfigurationProperties.class, KeyStoreProvider.class
+				KeyStoreProvider.class,
+				KeyStoreConfigurationProperties.class, JwtConfigurationProperties.class
 		})
-@ContextConfiguration(initializers = JwtEncoderDecoderTests.ContextInitializer.class)
 @EnableConfigurationProperties
 class JwtEncoderDecoderTests {
 
@@ -51,10 +44,6 @@ class JwtEncoderDecoderTests {
 	JwtEncoder jwtEncoder;
 	@Autowired
 	JwtDecoder jwtDecoder;
-
-
-	@TempDir
-	static Path tempParentDirectory;
 
 
 	@Test
@@ -121,18 +110,6 @@ class JwtEncoderDecoderTests {
 
 
 		assertThat(thrown).isNotNull();
-	}
-
-
-
-	static class ContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-		@Override
-		public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
-			TestPropertyValues testPropertyValues = TestPropertyValues.of(
-					"app.security.keystore.path=" + tempParentDirectory.resolve("keystore.p12")
-			);
-			testPropertyValues.applyTo(applicationContext);
-		}
 	}
 
 }
