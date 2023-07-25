@@ -25,6 +25,11 @@ public class SecurityConfiguration {
 				.cors(withDefaults())
 				.csrf(CsrfConfigurer::disable)
 				.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> {
+					auth.requestMatchers("/tokens").permitAll();
+					auth.anyRequest().authenticated();
+				})
+				.oauth2ResourceServer(resourceServer -> resourceServer.jwt(withDefaults()))
 				.build();
 	}
 
