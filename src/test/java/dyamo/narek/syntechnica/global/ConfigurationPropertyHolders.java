@@ -15,9 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-public class ConfigurationPropertiesBuilder {
+public class ConfigurationPropertyHolders {
 
-	private ConfigurationPropertiesBuilder() {}
+	private ConfigurationPropertyHolders() {}
 
 
 	@NotNull
