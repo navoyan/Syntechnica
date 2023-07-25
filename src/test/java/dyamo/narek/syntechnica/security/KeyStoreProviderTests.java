@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 
-import static dyamo.narek.syntechnica.global.ConfigurationPropertiesBuilder.configProperties;
+import static dyamo.narek.syntechnica.global.ConfigurationPropertyHolders.configProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class KeyStoreProviderTests {

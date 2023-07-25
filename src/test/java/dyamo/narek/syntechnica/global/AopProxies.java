@@ -4,9 +4,9 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultAopProxyFactory;
 
-public class AopProxyBuilder {
+public class AopProxies {
 
-	private AopProxyBuilder() {}
+	private AopProxies() {}
 
 
 	@SuppressWarnings("unchecked")

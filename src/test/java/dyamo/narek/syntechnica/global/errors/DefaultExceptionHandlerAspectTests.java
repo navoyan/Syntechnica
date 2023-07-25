@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 
-import static dyamo.narek.syntechnica.global.AopProxyBuilder.aopProxy;
+import static dyamo.narek.syntechnica.global.AopProxies.aopProxy;
 import static org.assertj.core.api.Assertions.*;
 
 class DefaultExceptionHandlerAspectTests {
