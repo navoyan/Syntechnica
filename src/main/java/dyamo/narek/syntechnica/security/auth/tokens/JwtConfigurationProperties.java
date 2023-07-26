@@ -1,4 +1,4 @@
-package dyamo.narek.syntechnica.security.auth;
+package dyamo.narek.syntechnica.security.auth.tokens;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -5,7 +5,7 @@ import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
 import dyamo.narek.syntechnica.security.KeyStoreProvider;
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
 import dyamo.narek.syntechnica.security.auth.AuthConfiguration;
-import dyamo.narek.syntechnica.security.auth.JwtConfigurationProperties;
+import dyamo.narek.syntechnica.security.auth.tokens.JwtConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;

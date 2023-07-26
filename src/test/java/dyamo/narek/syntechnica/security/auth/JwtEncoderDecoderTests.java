@@ -9,6 +9,7 @@ import com.nimbusds.jwt.PlainJWT;
 import dyamo.narek.syntechnica.security.KeyStoreConfiguration;
 import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
 import dyamo.narek.syntechnica.security.KeyStoreProvider;
+import dyamo.narek.syntechnica.security.auth.tokens.JwtConfigurationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -1,4 +1,4 @@
-package dyamo.narek.syntechnica.security.auth;
+package dyamo.narek.syntechnica.security.auth.tokens;
 
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
