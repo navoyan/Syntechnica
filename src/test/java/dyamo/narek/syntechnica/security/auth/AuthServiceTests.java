@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.security.auth;
 
+import dyamo.narek.syntechnica.security.auth.tokens.TokenService;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.UserBuilder;
 import dyamo.narek.syntechnica.users.UserService;
