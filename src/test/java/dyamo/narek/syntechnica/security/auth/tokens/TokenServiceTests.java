@@ -18,8 +18,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import java.util.stream.Collectors;
 
 import static dyamo.narek.syntechnica.global.ConfigurationPropertyHolders.configProperties;
-import static dyamo.narek.syntechnica.users.UserBuilder.user;
-import static dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder.authority;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
+import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
