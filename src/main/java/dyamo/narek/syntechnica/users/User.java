@@ -1,15 +1,11 @@
 package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +40,8 @@ public class User {
 			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
 			inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
 	)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private List<UserAuthority> authorities = new ArrayList<>();
-
-	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-	private AccessTokenMetadata accessTokenMetadata;
 
 }
