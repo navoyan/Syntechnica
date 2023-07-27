@@ -3,10 +3,7 @@ package dyamo.narek.syntechnica.users.authorities;
 import dyamo.narek.syntechnica.users.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.ArrayList;
@@ -29,8 +26,12 @@ public class UserAuthority implements GrantedAuthority {
 
 	private String scope;
 
+
 	@ManyToMany(mappedBy = "authorities")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private List<User> users = new ArrayList<>();
+
 
 
 	@Transient
