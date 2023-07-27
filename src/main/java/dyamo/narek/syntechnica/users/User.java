@@ -34,7 +34,8 @@ public class User {
 	@Pattern(regexp = SecurityConfiguration.BCRYPT_HASH_PATTERN)
 	private String password;
 
-	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+
+	@ManyToMany
 	@JoinTable(
 			name = "authorized_user__user_authority",
 			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
