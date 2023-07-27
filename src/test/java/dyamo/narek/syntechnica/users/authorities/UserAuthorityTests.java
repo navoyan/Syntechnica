@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder.authority;
+import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserAuthorityTests {

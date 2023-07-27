@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Set;
 
-import static dyamo.narek.syntechnica.users.UserBuilder.user;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserTests {

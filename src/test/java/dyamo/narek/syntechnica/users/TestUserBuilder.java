@@ -2,20 +2,22 @@ package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
-public class UserBuilder {
+public class TestUserBuilder {
 
 	private static int lastUserIndex = 0;
 	public static final String VALID_ENCODED_PASSWORD = "$2a$10$/T7x6zq6EBOmw9Br3zNoIu263D5TITk1QxK39AYgwN75AMUSCjwxu";
 
 	private final int userIndex = ++lastUserIndex;
-	private User configurableUser = new User(null, "user" + userIndex, VALID_ENCODED_PASSWORD, new ArrayList<>());
+	private User configurableUser = User.builder()
+			.name("user" + userIndex)
+			.password(VALID_ENCODED_PASSWORD)
+			.build();
 
 
-	public static UserBuilder user() {
-		return new UserBuilder();
+	public static TestUserBuilder user() {
+		return new TestUserBuilder();
 	}
 
 	public static void resetIndex() {
@@ -23,27 +25,27 @@ public class UserBuilder {
 	}
 
 
-	public UserBuilder withId() {
+	public TestUserBuilder withId() {
 		configurableUser.setId(userIndex);
 		return this;
 	}
 
-	public UserBuilder withId(Integer id) {
+	public TestUserBuilder withId(Integer id) {
 		configurableUser.setId(id);
 		return this;
 	}
 
-	public UserBuilder withName(String name) {
+	public TestUserBuilder withName(String name) {
 		configurableUser.setName(name);
 		return this;
 	}
 
-	public UserBuilder withPassword(String password) {
+	public TestUserBuilder withPassword(String password) {
 		configurableUser.setPassword(password);
 		return this;
 	}
 
-	public UserBuilder withAuthorities(UserAuthority... authorities) {
+	public TestUserBuilder withAuthorities(UserAuthority... authorities) {
 		configurableUser.getAuthorities().addAll(Arrays.asList(authorities));
 
 		for (UserAuthority authority : authorities) {

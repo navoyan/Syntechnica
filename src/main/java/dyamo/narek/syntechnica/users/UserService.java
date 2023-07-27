@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -41,8 +43,12 @@ public class UserService {
 
 		if (userRepository.countByAuthorityId(adminAuthority.getId()) > 0) return;
 
-		List<UserAuthority> authorities = new ArrayList<>(Collections.singletonList(adminAuthority));
-		User admin = new User(null, "admin", passwordEncoder.encode("admin"), authorities);
+		User admin = User.builder()
+				.name("admin")
+				.password(passwordEncoder.encode("admin"))
+				.authorities(Collections.singletonList(adminAuthority))
+				.build();
+
 		adminAuthority.getUsers().add(admin);
 
 		userRepository.save(admin);

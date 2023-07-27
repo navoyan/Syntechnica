@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder.authority;
+import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 

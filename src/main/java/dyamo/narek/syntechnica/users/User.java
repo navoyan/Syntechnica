@@ -1,11 +1,13 @@
 package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "authorized_user")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -42,5 +45,8 @@ public class User {
 			inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
 	)
 	private List<UserAuthority> authorities = new ArrayList<>();
+
+	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+	private AccessTokenMetadata accessTokenMetadata;
 
 }

@@ -4,7 +4,7 @@ import dyamo.narek.syntechnica.users.User;
 
 import java.util.Arrays;
 
-public class UserAuthorityBuilder {
+public class TestUserAuthorityBuilder {
 
 	private static int lastAuthorityIndex = 0;
 
@@ -12,8 +12,8 @@ public class UserAuthorityBuilder {
 	private UserAuthority configurableAuthority = new UserAuthority();
 
 
-	public static UserAuthorityBuilder authority() {
-		return new UserAuthorityBuilder();
+	public static TestUserAuthorityBuilder authority() {
+		return new TestUserAuthorityBuilder();
 	}
 
 	public static void resetIndex() {
@@ -21,27 +21,27 @@ public class UserAuthorityBuilder {
 	}
 
 
-	public UserAuthorityBuilder withId() {
+	public TestUserAuthorityBuilder withId() {
 		configurableAuthority.setId(authorityIndex);
 		return this;
 	}
 
-	public UserAuthorityBuilder withId(Integer id) {
+	public TestUserAuthorityBuilder withId(Integer id) {
 		configurableAuthority.setId(id);
 		return this;
 	}
 
-	public UserAuthorityBuilder withType(UserAuthorityType type) {
+	public TestUserAuthorityBuilder withType(UserAuthorityType type) {
 		configurableAuthority.setType(type);
 		return this;
 	}
 
-	public UserAuthorityBuilder withScope(String scope) {
+	public TestUserAuthorityBuilder withScope(String scope) {
 		configurableAuthority.setScope(scope);
 		return this;
 	}
 
-	public UserAuthorityBuilder withUsers(User... users) {
+	public TestUserAuthorityBuilder withUsers(User... users) {
 		configurableAuthority.getUsers().addAll(Arrays.asList(users));
 
 		for (User user : users) {

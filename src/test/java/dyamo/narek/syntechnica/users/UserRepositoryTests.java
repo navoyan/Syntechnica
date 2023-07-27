@@ -1,7 +1,7 @@
 package dyamo.narek.syntechnica.users;
 
+import dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
-import dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityType;
 import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;
@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import static dyamo.narek.syntechnica.users.UserBuilder.user;
-import static dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder.authority;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
+import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 
@@ -27,8 +27,8 @@ class UserRepositoryTests {
 
 	@BeforeEach
 	void beforeEach() {
-		UserBuilder.resetIndex();
-		UserAuthorityBuilder.resetIndex();
+		TestUserBuilder.resetIndex();
+		TestUserAuthorityBuilder.resetIndex();
 	}
 
 

@@ -1,8 +1,8 @@
 package dyamo.narek.syntechnica.security.auth;
 
 import dyamo.narek.syntechnica.security.auth.tokens.TokenService;
+import dyamo.narek.syntechnica.users.TestUserBuilder;
 import dyamo.narek.syntechnica.users.User;
-import dyamo.narek.syntechnica.users.UserBuilder;
 import dyamo.narek.syntechnica.users.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
-import static dyamo.narek.syntechnica.users.UserBuilder.user;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.BDDMockito.given;
@@ -35,7 +35,7 @@ class AuthServiceTests {
 
 	@BeforeEach
 	void beforeEach() {
-		UserBuilder.resetIndex();
+		TestUserBuilder.resetIndex();
 	}
 
 

@@ -1,7 +1,7 @@
 package dyamo.narek.syntechnica.users;
 
+import dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
-import dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityService;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityType;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +18,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static dyamo.narek.syntechnica.users.UserBuilder.VALID_ENCODED_PASSWORD;
-import static dyamo.narek.syntechnica.users.UserBuilder.user;
-import static dyamo.narek.syntechnica.users.authorities.UserAuthorityBuilder.authority;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.VALID_ENCODED_PASSWORD;
+import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
+import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,8 +49,8 @@ class UserServiceTests {
 
 	@BeforeEach
 	void beforeEach() {
-		UserBuilder.resetIndex();
-		UserAuthorityBuilder.resetIndex();
+		TestUserBuilder.resetIndex();
+		TestUserAuthorityBuilder.resetIndex();
 	}
 
 
