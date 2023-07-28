@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.security.auth.tokens;
 
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
 import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadataRepository;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static dyamo.narek.syntechnica.global.ConfigurationPropertyHolders.configProperties;
@@ -77,6 +79,36 @@ class TokenServiceTests {
 			);
 			assertThat(claims.<Long>getClaim(jwtProperties.getClaims().getVersion())).isEqualTo(1);
 		});
+	}
+
+
+	@Test
+	void getAccessTokenCurrentVersionForUsername_shouldReturnCurrentVersion_whenMetadataExists() {
+		String username = "user";
+		int persistedVersion = 5;
+
+		given(accessTokenMetadataRepository.findByUsername(username)).willReturn(
+				Optional.of(AccessTokenMetadata.builder().version(persistedVersion).build())
+		);
+
+
+		long providedVersion = tokenService.getAccessTokenCurrentVersion(username);
+
+
+		assertThat(providedVersion).isEqualTo(persistedVersion);
+	}
+
+	@Test
+	void getAccessTokenCurrentVersionForUsername_shouldReturn1_whenMetadataNotExists() {
+		String username = "user";
+
+		given(accessTokenMetadataRepository.findByUsername(username)).willReturn(Optional.empty());
+
+
+		long providedVersion = tokenService.getAccessTokenCurrentVersion(username);
+
+
+		assertThat(providedVersion).isEqualTo(1);
 	}
 
 }
