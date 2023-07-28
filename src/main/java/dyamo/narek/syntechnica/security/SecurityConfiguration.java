@@ -2,6 +2,7 @@ package dyamo.narek.syntechnica.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -20,7 +21,9 @@ public class SecurityConfiguration {
 
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http,
+												   AuthenticationManager authenticationManager
+	) throws Exception {
 		return http
 				.cors(withDefaults())
 				.csrf(CsrfConfigurer::disable)
@@ -29,7 +32,11 @@ public class SecurityConfiguration {
 					auth.requestMatchers("/tokens").permitAll();
 					auth.anyRequest().authenticated();
 				})
-				.oauth2ResourceServer(resourceServer -> resourceServer.jwt(withDefaults()))
+				.oauth2ResourceServer(resourceServer -> {
+					resourceServer.jwt(jwt -> {
+						jwt.authenticationManager(authenticationManager);
+					});
+				})
 				.build();
 	}
 

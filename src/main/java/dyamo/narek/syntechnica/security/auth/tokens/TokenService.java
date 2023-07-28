@@ -1,5 +1,7 @@
 package dyamo.narek.syntechnica.security.auth.tokens;
 
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadataRepository;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.validation.Valid;
@@ -16,11 +18,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TokenService {
+public class TokenService implements AccessTokenVersionProvider {
 
 	private final JwtConfigurationProperties properties;
 
 	private final JwtEncoder jwtEncoder;
+
+	private final AccessTokenMetadataRepository accessTokenMetadataRepository;
 
 
 	public @NonNull String createAccessToken(@NonNull @Valid User user) {
@@ -37,9 +41,18 @@ public class TokenService {
 				.expiresAt(expiresAt)
 				.subject(user.getName())
 				.claim(properties.getClaims().getAuthorities(), authorities)
+				.claim(properties.getClaims().getVersion(), 1L)
 				.build();
 
 		return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+	}
+
+
+	@Override
+	public long getAccessTokenCurrentVersion(@NonNull String username) {
+		return accessTokenMetadataRepository.findByUsername(username)
+				.map(AccessTokenMetadata::getVersion)
+				.orElse(1L);
 	}
 
 }

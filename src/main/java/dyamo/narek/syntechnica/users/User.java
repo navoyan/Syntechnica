@@ -1,6 +1,7 @@
 package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -37,11 +38,16 @@ public class User {
 	@ManyToMany
 	@JoinTable(
 			name = "authorized_user__user_authority",
-			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "authority_id")
 	)
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private List<UserAuthority> authorities = new ArrayList<>();
+
+	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private AccessTokenMetadata accessTokenMetadata;
 
 }

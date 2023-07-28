@@ -22,6 +22,8 @@ public class JwtConfigurationProperties {
 
 		private String authorities;
 
+		private String version;
+
 	}
 
 }

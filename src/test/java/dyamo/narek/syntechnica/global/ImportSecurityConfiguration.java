@@ -5,7 +5,9 @@ import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
 import dyamo.narek.syntechnica.security.KeyStoreProvider;
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
 import dyamo.narek.syntechnica.security.auth.AuthConfiguration;
+import dyamo.narek.syntechnica.security.auth.TestAuthConfiguration;
 import dyamo.narek.syntechnica.security.auth.tokens.JwtConfigurationProperties;
+import dyamo.narek.syntechnica.security.auth.tokens.VersionedJwtAuthenticationProvider;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -18,7 +20,8 @@ import java.lang.annotation.Target;
 @Import({
 		SecurityConfiguration.class,
 		AuthConfiguration.class, KeyStoreConfiguration.class,
-		KeyStoreProvider.class,
+		TestAuthConfiguration.class,
+		KeyStoreProvider.class, VersionedJwtAuthenticationProvider.class,
 		KeyStoreConfigurationProperties.class, JwtConfigurationProperties.class
 })
 public @interface ImportSecurityConfiguration {
