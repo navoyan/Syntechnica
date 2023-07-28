@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.security.auth.tokens;
 
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadataRepository;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import dyamo.narek.syntechnica.users.authorities.UserAuthorityType;
@@ -29,9 +30,11 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class TokenServiceTests {
 
-	JwtConfigurationProperties properties;
+	JwtConfigurationProperties jwtProperties;
 	@Mock
 	JwtEncoder jwtEncoder;
+	@Mock
+	AccessTokenMetadataRepository accessTokenMetadataRepository;
 
 	TokenService tokenService;
 
@@ -42,8 +45,8 @@ class TokenServiceTests {
 
 	@BeforeEach
 	void beforeEach() {
-		properties = configProperties(JwtConfigurationProperties.class);
-		tokenService = new TokenService(properties, jwtEncoder);
+		jwtProperties = configProperties(JwtConfigurationProperties.class);
+		tokenService = new TokenService(jwtProperties, jwtEncoder, accessTokenMetadataRepository);
 	}
 
 
@@ -66,12 +69,14 @@ class TokenServiceTests {
 		JwtEncoderParameters passedJwtParameters = jwtEncoderParametersCaptor.getValue();
 
 		assertThat(passedJwtParameters.getClaims()).satisfies(claims -> {
-			assertThat(claims.getClaimAsString(JwtClaimNames.ISS)).isEqualTo("syntechnica");
-			assertThat(claims.getIssuedAt().plus(properties.getExpirationTime())).isEqualTo(claims.getExpiresAt());
+			assertThat(claims.getClaimAsString(JwtClaimNames.ISS)).isEqualTo(jwtProperties.getIssuer());
+			assertThat(claims.getIssuedAt().plus(jwtProperties.getExpirationTime())).isEqualTo(claims.getExpiresAt());
 			assertThat(claims.getSubject()).isEqualTo(user.getName());
-			assertThat(claims.getClaimAsStringList("authorities")).containsExactlyInAnyOrderElementsOf(
+			assertThat(claims.getClaimAsStringList(jwtProperties.getClaims().getAuthorities())).containsExactlyInAnyOrderElementsOf(
 					user.getAuthorities().stream().map(UserAuthority::getAuthority).collect(Collectors.toList())
 			);
+			assertThat(claims.<Long>getClaim(jwtProperties.getClaims().getVersion())).isEqualTo(1);
 		});
 	}
+
 }

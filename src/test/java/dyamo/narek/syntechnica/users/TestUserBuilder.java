@@ -2,6 +2,7 @@ package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TestUserBuilder {
@@ -13,6 +14,7 @@ public class TestUserBuilder {
 	private User configurableUser = User.builder()
 			.name("user" + userIndex)
 			.password(VALID_ENCODED_PASSWORD)
+			.authorities(new ArrayList<>())
 			.build();
 
 
