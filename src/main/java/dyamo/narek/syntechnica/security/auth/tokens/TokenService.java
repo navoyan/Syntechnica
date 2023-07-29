@@ -6,6 +6,7 @@ import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -49,6 +50,7 @@ public class TokenService implements AccessTokenVersionProvider {
 
 
 	@Override
+	@Cacheable(cacheNames = "versions", cacheManager = "accessTokenMetadataCacheManager")
 	public long getAccessTokenCurrentVersion(@NonNull String username) {
 		return accessTokenMetadataRepository.findByUsername(username)
 				.map(AccessTokenMetadata::getVersion)
