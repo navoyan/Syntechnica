@@ -29,7 +29,7 @@ public class VersionedJwtAuthenticationProvider implements AuthenticationProvide
 		long version = jwt.getClaim(jwtProperties.getClaims().getVersion());
 
 		if (version != versionProvider.getAccessTokenCurrentVersion(jwt.getSubject())) {
-			throw new InvalidBearerTokenException("Outdated token version");
+			throw new InvalidBearerTokenException("An error occurred while attempting to validate the Jwt: Outdated version");
 		}
 
 		return authToken;
