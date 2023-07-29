@@ -5,6 +5,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -36,14 +37,26 @@ public class ErrorControllerAdvice {
 		Throwable original = exception.getCause();
 		HttpStatus responseStatus = exception.getResponseStatus();
 
-		var entityModel = EntityModel.of(
+		var errorResponseModel = EntityModel.of(
 				new ErrorResponse(responseStatus, original.getMessage()),
 				Link.of(uri).withSelfRel()
 		);
 
-		return new ResponseEntity<>(entityModel, responseStatus);
+		return new ResponseEntity<>(errorResponseModel, responseStatus);
 	}
 
+
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	@ExceptionHandler(AccessDeniedException.class)
+	public EntityModel<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception,
+																  HttpServletRequest request) {
+		String uri = getRequestUriBuilder(request).build().toUriString();
+
+		return EntityModel.of(
+				new ErrorResponse(HttpStatus.FORBIDDEN, exception.getMessage()),
+				Link.of(uri).withSelfRel()
+		);
+	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
