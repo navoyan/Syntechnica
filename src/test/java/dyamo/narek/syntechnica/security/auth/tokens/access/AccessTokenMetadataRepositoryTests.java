@@ -55,7 +55,7 @@ class AccessTokenMetadataRepositoryTests {
 	}
 
 	@Test
-	void findByUsername_shouldReturnEmptyOptional_whenUserNotExists() {
+	void findByUsername_shouldReturnEmptyOptional_whenUserDoesntExist() {
 		String notExistingUsername = "not_existing";
 
 		User user = user().build();

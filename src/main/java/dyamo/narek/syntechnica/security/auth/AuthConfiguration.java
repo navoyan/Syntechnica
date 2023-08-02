@@ -6,8 +6,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import dyamo.narek.syntechnica.security.auth.tokens.JwtConfigurationProperties;
 import dyamo.narek.syntechnica.security.auth.tokens.VersionedJwtAuthenticationProvider;
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,10 +52,10 @@ public class AuthConfiguration {
 
 
 	@Bean
-	public JwtAuthenticationConverter authenticationConverter(JwtConfigurationProperties jwtProperties) {
+	public JwtAuthenticationConverter authenticationConverter(AccessTokenConfigurationProperties accessTokenProperties) {
 		JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
 		authoritiesConverter.setAuthorityPrefix("");
-		authoritiesConverter.setAuthoritiesClaimName(jwtProperties.getClaims().getAuthorities());
+		authoritiesConverter.setAuthoritiesClaimName(accessTokenProperties.getClaims().getAuthorities());
 
 		JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
 		converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);

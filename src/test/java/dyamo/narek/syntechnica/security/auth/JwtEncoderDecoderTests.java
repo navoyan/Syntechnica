@@ -9,8 +9,8 @@ import com.nimbusds.jwt.PlainJWT;
 import dyamo.narek.syntechnica.security.KeyStoreConfiguration;
 import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
 import dyamo.narek.syntechnica.security.KeyStoreProvider;
-import dyamo.narek.syntechnica.security.auth.tokens.JwtConfigurationProperties;
 import dyamo.narek.syntechnica.security.auth.tokens.VersionedJwtAuthenticationProvider;
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.catchException;
 		classes = {
 				AuthConfiguration.class, KeyStoreConfiguration.class, TestAuthConfiguration.class,
 				KeyStoreProvider.class, VersionedJwtAuthenticationProvider.class,
-				KeyStoreConfigurationProperties.class, JwtConfigurationProperties.class
+				KeyStoreConfigurationProperties.class, AccessTokenConfigurationProperties.class
 		})
 @EnableConfigurationProperties
 class JwtEncoderDecoderTests {
@@ -48,18 +48,18 @@ class JwtEncoderDecoderTests {
 	JwtDecoder jwtDecoder;
 
 	@Autowired
-	JwtConfigurationProperties jwtProperties;
+	AccessTokenConfigurationProperties accessTokenProperties;
 
 
 	@Test
 	void shouldSuccessfullyDecodeAndValidate_whenJwtIsSignedBy() {
 		JwtClaimsSet claims = JwtClaimsSet.builder()
-				.issuer(jwtProperties.getIssuer())
+				.issuer(accessTokenProperties.getIssuer())
 				.issuedAt(Instant.now())
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))
 				.subject("user")
-				.claim(jwtProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
-				.claim(jwtProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
+				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
 				.build();
 
 		String encodedJwt = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -72,12 +72,12 @@ class JwtEncoderDecoderTests {
 	@Test
 	void shouldThrowException_whenJwtIsNotSigned() {
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
-				.issuer(jwtProperties.getIssuer())
+				.issuer(accessTokenProperties.getIssuer())
 				.issueTime(Date.from(Instant.now()))
 				.expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
 				.subject("user")
-				.claim(jwtProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
-				.claim(jwtProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
+				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
 				.build();
 
 		String encodedJwt = new PlainJWT(claims).serialize();
@@ -94,12 +94,12 @@ class JwtEncoderDecoderTests {
 	@Test
 	void shouldThrowException_whenJwtIsSignedByForeignKey() {
 		JwtClaimsSet claims = JwtClaimsSet.builder()
-				.issuer(jwtProperties.getIssuer())
+				.issuer(accessTokenProperties.getIssuer())
 				.issuedAt(Instant.now())
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))
 				.subject("user")
-				.claim(jwtProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
-				.claim(jwtProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
+				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
 				.build();
 
 		KeyPair foreignKeyPair = keyStoreProvider.generateRSAKeyPair(new SecureRandom());
