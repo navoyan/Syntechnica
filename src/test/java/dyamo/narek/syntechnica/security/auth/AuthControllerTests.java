@@ -1,6 +1,7 @@
 package dyamo.narek.syntechnica.security.auth;
 
 import dyamo.narek.syntechnica.global.ImportControllerConfiguration;
+import dyamo.narek.syntechnica.security.auth.tokens.refresh.InvalidRefreshTokenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -92,6 +93,73 @@ class AuthControllerTests {
 				})))
 				.andExpect(errorResponse().selfRef().value(matchAssertion((String selfRef) -> {
 					assertThat(selfRef).endsWith("/tokens?grant_type=credentials");
+				})));
+	}
+
+
+	@Test
+	void generateTokensUsingRefreshToken_shouldGenerateTokens_whenProvidedRefreshTokenIsValid() throws Exception {
+		UUID providedValidRefreshToken = UUID.randomUUID();
+		String refreshTokenRequestBody = "{\"refreshToken\":\"" + providedValidRefreshToken + "\"}";
+
+		var tokenResponse = new TokenResponse("ENCODED ACCESS TOKEN", UUID.randomUUID());
+		given(authService.generateTokens(any(UUID.class))).willReturn(tokenResponse);
+
+
+		var perform = mockMvc.perform(post("/tokens?grant_type=refresh_token")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(refreshTokenRequestBody));
+
+
+		perform.andExpect(jsonPath("$.accessToken").value(tokenResponse.getAccessToken()))
+				.andExpect(jsonPath("$.refreshToken").value(tokenResponse.getRefreshToken().toString()))
+				.andExpect(jsonPath("$._links.self.href").value(matchAssertion((String selfRef) -> {
+					assertThat(selfRef).endsWith("/tokens?grant_type=refresh_token");
+				})))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void generateTokensUsingRefreshToken_shouldGiveErrorResponse_whenProvidedRefreshTokenIsInvalid() throws Exception {
+		UUID providedInvalidRefreshToken = UUID.randomUUID();
+		String refreshTokenRequestBody = "{\"refreshToken\":\"" + providedInvalidRefreshToken + "\"}";
+
+		String exceptionMessage = "INVALID REFRESH TOKEN MESSAGE";
+		given(authService.generateTokens(any(UUID.class)))
+				.willThrow(new InvalidRefreshTokenException(exceptionMessage));
+
+
+		var perform = mockMvc.perform(post("/tokens?grant_type=refresh_token")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(refreshTokenRequestBody));
+
+
+		perform.andExpect(errorResponse().status(HttpStatus.UNAUTHORIZED))
+				.andExpect(errorResponse().validTimestamp())
+				.andExpect(errorResponse().message().value(exceptionMessage))
+				.andExpect(errorResponse().selfRef().value(matchAssertion((String selfRef) -> {
+					assertThat(selfRef).endsWith("/tokens?grant_type=refresh_token");
+				})));
+	}
+
+	@Test
+	void generateTokensUsingRefreshToken_shouldGiveErrorResponse_whenProvidedRefreshTokenRequestFailsValidation()
+			throws Exception {
+		String refreshTokenRequestBody = "{}";
+
+
+		var perform = mockMvc.perform(post("/tokens?grant_type=refresh_token")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(refreshTokenRequestBody));
+
+
+		perform.andExpect(errorResponse().status(HttpStatus.BAD_REQUEST))
+				.andExpect(errorResponse().validTimestamp())
+				.andExpect(errorResponse().message().value(matchAssertion((String message) -> {
+					assertThat(message).startsWith("Validation failed");
+				})))
+				.andExpect(errorResponse().selfRef().value(matchAssertion((String selfRef) -> {
+					assertThat(selfRef).endsWith("/tokens?grant_type=refresh_token");
 				})));
 	}
 
