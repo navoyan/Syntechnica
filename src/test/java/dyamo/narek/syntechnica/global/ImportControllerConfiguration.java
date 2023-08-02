@@ -12,6 +12,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @ImportSecurityConfiguration
-@Import({AopAutoConfiguration.class, DefaultExceptionHandlerAspect.class})
+@Import({
+		TestAccessTokenProvider.class,
+		AopAutoConfiguration.class, DefaultExceptionHandlerAspect.class
+})
 public @interface ImportControllerConfiguration {
 }
