@@ -13,7 +13,7 @@ import lombok.*;
 public class AccessTokenMetadata {
 
 	@Id
-	private Integer userId;
+	private int userId;
 
 	@OneToOne(optional = false)
 	@PrimaryKeyJoinColumn

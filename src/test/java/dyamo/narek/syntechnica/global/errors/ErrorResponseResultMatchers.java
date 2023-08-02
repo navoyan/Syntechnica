@@ -3,6 +3,7 @@ package dyamo.narek.syntechnica.global.errors;
 import org.hamcrest.Matcher;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
@@ -41,22 +42,22 @@ public class ErrorResponseResultMatchers {
 		};
 	}
 
-	public ResultMatcher message(String message) {
-		return MockMvcResultMatchers.jsonPath("$.message").value(message);
+	public JsonPathResultMatchers message() {
+		return MockMvcResultMatchers.jsonPath("$.message");
 	}
 
-	public ResultMatcher message(Matcher<String> messageMatcher) {
-		return MockMvcResultMatchers.jsonPath("$.message").value(messageMatcher);
+	public JsonPathResultMatchers link(String linkPath) {
+		return MockMvcResultMatchers.jsonPath("$._links." + linkPath);
 	}
 
-	public ErrorResponseResultMatchers.Link link(String linkPath) {
-		return new ErrorResponseResultMatchers.Link(linkPath);
+	public JsonPathResultMatchers selfRef() {
+		return link("self.href");
 	}
 
-	public ErrorResponseResultMatchers.Link selfRef() {
-		return new ErrorResponseResultMatchers.Link("self.href");
-	}
 
+	public JsonPathResultMatchers timestamp() {
+		return MockMvcResultMatchers.jsonPath("$.timestamp");
+	}
 
 	public ResultMatcher timestamp(LocalDateTime timestamp) {
 		return MockMvcResultMatchers.jsonPath("$.timestamp").value(matchAssertion((String matchedTimestamp) -> {
@@ -70,30 +71,12 @@ public class ErrorResponseResultMatchers {
 		}));
 	}
 
+
+
 	public ResultMatcher validTimestamp() {
 		return MockMvcResultMatchers.jsonPath("$.timestamp").value(matchAssertion((String timestamp) -> {
 			LocalDateTime.parse(timestamp);
 		}));
-	}
-
-
-
-	public static class Link {
-
-		private final String path;
-
-		private Link(String path) {
-			this.path = "$._links." + path;
-		}
-
-
-		public ResultMatcher value(String link) {
-			return MockMvcResultMatchers.jsonPath(path).value(link);
-		}
-
-		public ResultMatcher value(Matcher<String> linkMatcher) {
-			return MockMvcResultMatchers.jsonPath(path).value(linkMatcher);
-		}
 	}
 
 }

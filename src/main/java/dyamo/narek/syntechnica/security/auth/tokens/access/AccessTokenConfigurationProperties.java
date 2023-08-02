@@ -1,13 +1,13 @@
-package dyamo.narek.syntechnica.security.auth.tokens;
+package dyamo.narek.syntechnica.security.auth.tokens.access;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
-@ConfigurationProperties(prefix = "app.security.auth.jwt")
+@ConfigurationProperties(prefix = "app.security.auth.tokens.access")
 @Data
-public class JwtConfigurationProperties {
+public class AccessTokenConfigurationProperties {
 
 	private String issuer;
 

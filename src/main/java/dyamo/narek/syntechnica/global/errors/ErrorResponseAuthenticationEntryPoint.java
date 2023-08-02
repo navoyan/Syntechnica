@@ -22,13 +22,16 @@ public class ErrorResponseAuthenticationEntryPoint implements AuthenticationEntr
 	private final ObjectMapper objectMapper;
 
 
-	public ErrorResponseAuthenticationEntryPoint(ObjectMapper objectMapper, HypermediaMappingInformation halMediaTypeConfiguration) {
+	public ErrorResponseAuthenticationEntryPoint(ObjectMapper objectMapper,
+												 HypermediaMappingInformation halMediaTypeConfiguration) {
 		this.objectMapper = halMediaTypeConfiguration.configureObjectMapper(objectMapper.copy());
 	}
 
 
 	@Override
-	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+	public void commence(HttpServletRequest request,
+						 HttpServletResponse response,
+						 AuthenticationException authException) throws IOException {
 		HttpStatus status = HttpStatus.UNAUTHORIZED;
 		String uri = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
 

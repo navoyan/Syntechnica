@@ -18,9 +18,13 @@ app:
         password: ${app.security.keystore.password}
 
     auth:
-      jwt:
-        issuer: ${app.name}
-        expiration-time: 2h
-        claims:
-          authorities: authorities
-          version: version
+      tokens:
+        refresh:
+          expiration-time: 30d
+
+        access:
+          issuer: ${app.name}
+          expiration-time: 2h
+          claims:
+            authorities: authorities
+            version: version

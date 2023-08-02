@@ -1,7 +1,6 @@
-package dyamo.narek.syntechnica.security.auth.tokens;
+package dyamo.narek.syntechnica.security.auth.tokens.access;
 
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadataRepository;
+import dyamo.narek.syntechnica.security.auth.tokens.AccessTokenVersionProvider;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.validation.Valid;
@@ -19,9 +18,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TokenService implements AccessTokenVersionProvider {
+public class AccessTokenService implements AccessTokenVersionProvider {
 
-	private final JwtConfigurationProperties properties;
+	private final AccessTokenConfigurationProperties accessTokenProperties;
 
 	private final JwtEncoder jwtEncoder;
 
@@ -30,29 +29,36 @@ public class TokenService implements AccessTokenVersionProvider {
 
 	public @NonNull String createAccessToken(@NonNull @Valid User user) {
 		Instant issuedAt = Instant.now();
-		Instant expiresAt = issuedAt.plus(properties.getExpirationTime());
+		Instant expiresAt = issuedAt.plus(accessTokenProperties.getExpirationTime());
 
 		List<String> authorities = user.getAuthorities().stream()
 				.map(UserAuthority::getAuthority)
 				.collect(Collectors.toList());
 
 		JwtClaimsSet claims = JwtClaimsSet.builder()
-				.issuer(properties.getIssuer())
+				.issuer(accessTokenProperties.getIssuer())
 				.issuedAt(issuedAt)
 				.expiresAt(expiresAt)
 				.subject(user.getName())
-				.claim(properties.getClaims().getAuthorities(), authorities)
-				.claim(properties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getAuthorities(), authorities)
+				.claim(accessTokenProperties.getClaims().getVersion(), getAccessTokenCurrentVersion(user))
 				.build();
+
 
 		return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 	}
 
-
-	@Override
 	@Cacheable(cacheNames = "versions", cacheManager = "accessTokenMetadataCacheManager")
+	@Override
 	public long getAccessTokenCurrentVersion(@NonNull String username) {
 		return accessTokenMetadataRepository.findByUsername(username)
+				.map(AccessTokenMetadata::getVersion)
+				.orElse(1L);
+	}
+
+
+	private long getAccessTokenCurrentVersion(@NonNull User user) {
+		return accessTokenMetadataRepository.findById(user.getId())
 				.map(AccessTokenMetadata::getVersion)
 				.orElse(1L);
 	}

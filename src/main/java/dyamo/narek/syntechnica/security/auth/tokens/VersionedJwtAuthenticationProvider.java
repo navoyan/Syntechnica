@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.security.auth.tokens;
 
+import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -18,7 +19,7 @@ public class VersionedJwtAuthenticationProvider implements AuthenticationProvide
 
 	private final AccessTokenVersionProvider versionProvider;
 
-	private final JwtConfigurationProperties jwtProperties;
+	private final AccessTokenConfigurationProperties accessTokenProperties;
 
 
 	@Override
@@ -26,7 +27,7 @@ public class VersionedJwtAuthenticationProvider implements AuthenticationProvide
 		var authToken = (JwtAuthenticationToken) originalProvider.authenticate(authentication);
 		Jwt jwt = authToken.getToken();
 
-		long version = jwt.getClaim(jwtProperties.getClaims().getVersion());
+		long version = jwt.getClaim(accessTokenProperties.getClaims().getVersion());
 
 		if (version != versionProvider.getAccessTokenCurrentVersion(jwt.getSubject())) {
 			throw new InvalidBearerTokenException("An error occurred while attempting to validate the Jwt: Outdated version");
