@@ -42,16 +42,14 @@ public class ErrorResponseResultMatchers {
 		};
 	}
 
+
 	public JsonPathResultMatchers message() {
 		return MockMvcResultMatchers.jsonPath("$.message");
 	}
 
-	public JsonPathResultMatchers link(String linkPath) {
-		return MockMvcResultMatchers.jsonPath("$._links." + linkPath);
-	}
 
-	public JsonPathResultMatchers selfRef() {
-		return link("self.href");
+	public JsonPathResultMatchers path() {
+		return MockMvcResultMatchers.jsonPath("$.path");
 	}
 
 

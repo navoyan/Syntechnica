@@ -1,8 +1,8 @@
 package dyamo.narek.syntechnica.users;
 
 import dyamo.narek.syntechnica.security.SecurityConfiguration;
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenMetadata;
-import dyamo.narek.syntechnica.security.auth.tokens.refresh.RefreshToken;
+import dyamo.narek.syntechnica.tokens.access.AccessTokenMetadata;
+import dyamo.narek.syntechnica.tokens.refresh.RefreshToken;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

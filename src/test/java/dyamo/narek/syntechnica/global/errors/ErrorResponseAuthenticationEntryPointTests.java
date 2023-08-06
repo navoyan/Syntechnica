@@ -6,30 +6,32 @@ import dyamo.narek.syntechnica.global.errors.ErrorResponseAuthenticationEntryPoi
 import dyamo.narek.syntechnica.users.TestUserBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
-import static dyamo.narek.syntechnica.global.AssertionMatchers.matchAssertion;
+import static dyamo.narek.syntechnica.global.RestDocumentationProviders.docMockMvc;
+import static dyamo.narek.syntechnica.global.RestDocumentationProviders.fullUri;
 import static dyamo.narek.syntechnica.global.errors.ErrorResponseResultMatchers.errorResponse;
 import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TestController.class)
 @Import(TestController.class)
 @ImportControllerConfiguration
+@ExtendWith(RestDocumentationExtension.class)
 class ErrorResponseAuthenticationEntryPointTests {
 
-	@Autowired
 	MockMvc mockMvc;
 
 	@Autowired
@@ -37,8 +39,9 @@ class ErrorResponseAuthenticationEntryPointTests {
 
 
 	@BeforeEach
-	void beforeEach() {
+	void beforeEach(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
 		TestUserBuilder.resetIndex();
+		mockMvc = docMockMvc(webApplicationContext, restDocumentation);
 	}
 
 
@@ -47,18 +50,13 @@ class ErrorResponseAuthenticationEntryPointTests {
 		String securedEndpoint = "/secured";
 
 
-		var perform = mockMvc.perform(post(securedEndpoint));
+		var actions = mockMvc.perform(post(securedEndpoint));
 
 
-		perform.andExpect(errorResponse().status(HttpStatus.UNAUTHORIZED))
-				.andExpect(content().contentType(MediaTypes.HAL_JSON))
+		actions.andExpect(errorResponse().status(HttpStatus.UNAUTHORIZED))
 				.andExpect(errorResponse().validTimestamp())
-				.andExpect(errorResponse().message().value(matchAssertion((String message) -> {
-					assertThat(message).isNotEmpty();
-				})))
-				.andExpect(errorResponse().selfRef().value(matchAssertion((String selfRef) -> {
-					assertThat(selfRef).endsWith(securedEndpoint);
-				})));
+				.andExpect(errorResponse().message().exists())
+				.andExpect(errorResponse().path().value(fullUri(securedEndpoint)));
 	}
 
 	@Test
@@ -66,11 +64,11 @@ class ErrorResponseAuthenticationEntryPointTests {
 		String securedEndpoint = "/secured";
 
 
-		var perform = mockMvc.perform(post(securedEndpoint)
+		var actions = mockMvc.perform(post(securedEndpoint)
 				.with(testAccessTokenProvider.bearerAccessToken(user().build())));
 
 
-		perform.andExpect(status().isOk());
+		actions.andExpect(status().isOk());
 	}
 
 

@@ -1,6 +1,6 @@
 package dyamo.narek.syntechnica.global;
 
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
+import dyamo.narek.syntechnica.tokens.access.AccessTokenConfigurationProperties;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.validation.Valid;
