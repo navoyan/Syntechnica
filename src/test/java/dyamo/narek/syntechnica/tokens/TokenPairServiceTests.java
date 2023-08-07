@@ -1,6 +1,8 @@
 package dyamo.narek.syntechnica.tokens;
 
 import dyamo.narek.syntechnica.tokens.access.AccessTokenService;
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
+import dyamo.narek.syntechnica.tokens.family.TokenFamilyService;
 import dyamo.narek.syntechnica.tokens.refresh.InvalidRefreshTokenException;
 import dyamo.narek.syntechnica.tokens.refresh.ProhibitedRefreshTokenException;
 import dyamo.narek.syntechnica.tokens.refresh.RefreshToken;
@@ -33,6 +35,8 @@ class TokenPairServiceTests {
 	@Mock
 	UserService userService;
 	@Mock
+	TokenFamilyService tokenFamilyService;
+	@Mock
 	AccessTokenService accessTokenService;
 	@Mock
 	RefreshTokenService refreshTokenService;
@@ -49,7 +53,11 @@ class TokenPairServiceTests {
 
 	@Test
 	void generateTokens_shouldGenerateValidTokenPair_whenProvidedCredentialsAreValid() {
-		User user = user().build();
+		User user = user().withId().build();
+
+		var tokenFamily = TokenFamily.builder().id(1L).user(user).build();
+		given(tokenFamilyService.createTokenFamily(user)).willReturn(tokenFamily);
+
 		var credentials = new UserCredentialsRequest(user.getName(), "password");
 
 		given(userService.findUserByName(user.getName())).willReturn(Optional.of(user));
@@ -57,8 +65,8 @@ class TokenPairServiceTests {
 
 		String encodedAccessToken = "ENCODED ACCESS TOKEN";
 		UUID refreshTokenValue = UUID.randomUUID();
-		given(accessTokenService.createAccessToken(user)).willReturn(encodedAccessToken);
-		given(refreshTokenService.createRefreshToken(user)).willReturn(refreshTokenValue);
+		given(accessTokenService.createAccessToken(tokenFamily)).willReturn(encodedAccessToken);
+		given(refreshTokenService.createRefreshToken(tokenFamily)).willReturn(refreshTokenValue);
 
 
 		TokenPairResponse tokenPairResponse = tokenPairService.generateTokens(credentials);
@@ -85,7 +93,7 @@ class TokenPairServiceTests {
 
 	@Test
 	void generateTokens_shouldThrowException_whenUserPasswordDoesNotMatch() {
-		User user = user().build();
+		User user = user().withId().build();
 		var credentials = new UserCredentialsRequest(user.getName(), "password");
 
 		given(userService.findUserByName(user.getName())).willReturn(Optional.of(user));
@@ -105,35 +113,32 @@ class TokenPairServiceTests {
 	void generateTokens_shouldGenerateValidTokenPair_whenProvidedRefreshTokenIsValid() {
 		UUID providedRefreshTokenValue = UUID.randomUUID();
 
-		User user = user().withId().build();
-		long family = 3L;
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.lastGeneration(1L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken persistedRefreshToken = RefreshToken.builder()
 				.value(providedRefreshTokenValue)
-				.family(family)
-				.user(user)
+				.family(tokenFamily)
+				.generation(tokenFamily.getLastGeneration())
 				.creationTimestamp(Instant.now().minus(30, ChronoUnit.MINUTES))
 				.expirationTimestamp(Instant.now().plus(30, ChronoUnit.MINUTES))
 				.build();
 		given(refreshTokenService.findRefreshTokenByValue(providedRefreshTokenValue))
 				.willReturn(Optional.of(persistedRefreshToken));
-		given(refreshTokenService.findCurrentAllowedRefreshToken(user, family))
-				.willReturn(Optional.of(persistedRefreshToken));
-
-		given(refreshTokenService.isRefreshTokenExpired(persistedRefreshToken)).willReturn(false);
 
 		String encodedAccessToken = "ENCODED ACCESS TOKEN";
 		UUID newRefreshTokenValue = UUID.randomUUID();
-		given(accessTokenService.createAccessToken(user)).willReturn(encodedAccessToken);
-		given(refreshTokenService.createRefreshToken(user, family)).willReturn(newRefreshTokenValue);
+		given(accessTokenService.createAccessToken(tokenFamily)).willReturn(encodedAccessToken);
+		given(refreshTokenService.createRefreshToken(tokenFamily)).willReturn(newRefreshTokenValue);
 
 
 		TokenPairResponse tokenPairResponse = tokenPairService.generateTokens(providedRefreshTokenValue);
 
 
-		verify(refreshTokenService).findCurrentAllowedRefreshToken(user, family);
-		verify(refreshTokenService).isRefreshTokenExpired(persistedRefreshToken);
-		verify(refreshTokenService, never()).invalidateUserRefreshTokenFamily(user, family);
+		verify(tokenFamilyService, never()).invalidateTokenFamily(tokenFamily);
 
 		assertThat(tokenPairResponse.getAccessToken()).isEqualTo(encodedAccessToken);
 		assertThat(tokenPairResponse.getRefreshToken()).isEqualTo(newRefreshTokenValue);
@@ -156,31 +161,24 @@ class TokenPairServiceTests {
 	}
 
 	@Test
-	void generateTokens_shouldInvalidateTokenFamilyAndThrowException_whenProvidedRefreshTokenIsNotCurrentAllowed() {
+	void generateTokens_shouldInvalidateTokenFamilyAndThrowException_whenProvidedRefreshTokenIsNotLastGeneration() {
 		UUID providedRefreshTokenValue = UUID.randomUUID();
 
-		User user = user().withId().build();
-		long family = 3L;
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.lastGeneration(2L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken persistedRefreshToken = RefreshToken.builder()
 				.value(providedRefreshTokenValue)
-				.family(family)
-				.user(user)
+				.family(tokenFamily)
+				.generation(1L)
 				.creationTimestamp(Instant.now().minus(30, ChronoUnit.MINUTES))
 				.expirationTimestamp(Instant.now().plus(30, ChronoUnit.MINUTES))
 				.build();
 		given(refreshTokenService.findRefreshTokenByValue(providedRefreshTokenValue))
 				.willReturn(Optional.of(persistedRefreshToken));
-
-		RefreshToken currentAllowedRefreshToken = RefreshToken.builder()
-				.value(UUID.randomUUID())
-				.family(family)
-				.user(user)
-				.creationTimestamp(Instant.now())
-				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
-				.build();
-		given(refreshTokenService.findCurrentAllowedRefreshToken(user, family))
-				.willReturn(Optional.of(currentAllowedRefreshToken));
 
 
 		Exception thrown = catchException(() -> {
@@ -188,8 +186,7 @@ class TokenPairServiceTests {
 		});
 
 
-		verify(refreshTokenService).findCurrentAllowedRefreshToken(user, family);
-		verify(refreshTokenService).invalidateUserRefreshTokenFamily(user, family);
+		verify(tokenFamilyService).invalidateTokenFamily(tokenFamily);
 
 		assertThat(thrown).isInstanceOf(ProhibitedRefreshTokenException.class);
 	}
@@ -198,22 +195,21 @@ class TokenPairServiceTests {
 	void generateTokens_shouldThrowException_whenProvidedRefreshTokenIsExpired() {
 		UUID providedRefreshTokenValue = UUID.randomUUID();
 
-		User user = user().withId().build();
-		long family = 3L;
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.lastGeneration(1L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken persistedRefreshToken = RefreshToken.builder()
 				.value(providedRefreshTokenValue)
-				.family(family)
-				.user(user)
-				.creationTimestamp(Instant.now().minus(30, ChronoUnit.MINUTES))
-				.expirationTimestamp(Instant.now().plus(30, ChronoUnit.MINUTES))
+				.family(tokenFamily)
+				.generation(tokenFamily.getLastGeneration())
+				.creationTimestamp(Instant.now().minus(2, ChronoUnit.HOURS))
+				.expirationTimestamp(Instant.now().minus(1, ChronoUnit.HOURS))
 				.build();
 		given(refreshTokenService.findRefreshTokenByValue(providedRefreshTokenValue))
 				.willReturn(Optional.of(persistedRefreshToken));
-		given(refreshTokenService.findCurrentAllowedRefreshToken(user, family))
-				.willReturn(Optional.of(persistedRefreshToken));
-
-		given(refreshTokenService.isRefreshTokenExpired(persistedRefreshToken)).willReturn(true);
 
 
 		Exception thrown = catchException(() -> {
@@ -221,9 +217,7 @@ class TokenPairServiceTests {
 		});
 
 
-		verify(refreshTokenService).findCurrentAllowedRefreshToken(user, family);
-		verify(refreshTokenService).isRefreshTokenExpired(persistedRefreshToken);
-		verify(refreshTokenService, never()).invalidateUserRefreshTokenFamily(user, family);
+		verify(tokenFamilyService, never()).invalidateTokenFamily(tokenFamily);
 
 		assertThat(thrown).isInstanceOf(InvalidRefreshTokenException.class);
 	}

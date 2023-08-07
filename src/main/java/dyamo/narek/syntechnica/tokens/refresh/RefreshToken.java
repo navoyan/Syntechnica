@@ -1,6 +1,6 @@
 package dyamo.narek.syntechnica.tokens.refresh;
 
-import dyamo.narek.syntechnica.users.User;
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -22,19 +22,29 @@ public class RefreshToken {
 
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "family_id")
 	@NotNull
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	private User user;
+	private TokenFamily family;
 
 
-	private long family;
+	private long generation;
 
 	@NotNull
 	private Instant creationTimestamp;
 
 	@NotNull
 	private Instant expirationTimestamp;
+
+
+
+	public boolean isExpired() {
+		return expirationTimestamp.isBefore(Instant.now());
+	}
+
+	public boolean isLastGeneration() {
+		return generation == family.getLastGeneration();
+	}
 
 }

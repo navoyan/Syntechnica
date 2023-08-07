@@ -1,7 +1,7 @@
 package dyamo.narek.syntechnica.tokens.refresh;
 
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import dyamo.narek.syntechnica.users.TestUserBuilder;
-import dyamo.narek.syntechnica.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,61 +50,20 @@ class RefreshTokenServiceTests {
 
 	@Test
 	void createRefreshToken_shouldCreateAndSaveValidRefreshTokenWithSpecifiedFamily() {
-		User user = user().withId().build();
-		long family = 3L;
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.user(user().withId().build())
+				.build();
 
 
-		UUID createdRefreshTokenValue = refreshTokenService.createRefreshToken(user, family);
-
-
-		verify(refreshTokenRepository).save(refreshTokenCaptor.capture());
-		RefreshToken savedRefreshToken = refreshTokenCaptor.getValue();
-
-		assertThat(savedRefreshToken.getValue()).isEqualTo(createdRefreshTokenValue);
-		assertThat(savedRefreshToken.getUser()).isEqualTo(user);
-		assertThat(savedRefreshToken.getFamily()).isEqualTo(family);
-		assertThat(savedRefreshToken.getCreationTimestamp().plus(refreshTokenProperties.getExpirationTime()))
-				.isEqualTo(savedRefreshToken.getExpirationTimestamp());
-	}
-
-	@Test
-	void createRefreshToken_shouldCreateAndSaveValidRefreshTokenWithNewFamily_whenAtLeastOneFamilyExists() {
-		User user = user().withId().build();
-
-		long lastTokenFamily = 5L;
-		given(refreshTokenRepository.findLastTokenFamilyOfUser(user)).willReturn(Optional.of(lastTokenFamily));
-
-
-		UUID createdRefreshTokenValue = refreshTokenService.createRefreshToken(user);
+		UUID createdRefreshTokenValue = refreshTokenService.createRefreshToken(tokenFamily);
 
 
 		verify(refreshTokenRepository).save(refreshTokenCaptor.capture());
 		RefreshToken savedRefreshToken = refreshTokenCaptor.getValue();
 
 		assertThat(savedRefreshToken.getValue()).isEqualTo(createdRefreshTokenValue);
-		assertThat(savedRefreshToken.getUser()).isEqualTo(user);
-		assertThat(savedRefreshToken.getFamily()).isEqualTo(lastTokenFamily + 1L);
-		assertThat(savedRefreshToken.getCreationTimestamp().plus(refreshTokenProperties.getExpirationTime()))
-				.isEqualTo(savedRefreshToken.getExpirationTimestamp());
-	}
-
-	@Test
-	void createRefreshToken_shouldCreateAndSaveValidRefreshTokenWithNewFirstFamily_whenNoFamilyExists() {
-		User user = user().withId().build();
-
-
-		given(refreshTokenRepository.findLastTokenFamilyOfUser(user)).willReturn(Optional.empty());
-
-
-		UUID createdRefreshTokenValue = refreshTokenService.createRefreshToken(user);
-
-
-		verify(refreshTokenRepository).save(refreshTokenCaptor.capture());
-		RefreshToken savedRefreshToken = refreshTokenCaptor.getValue();
-
-		assertThat(savedRefreshToken.getValue()).isEqualTo(createdRefreshTokenValue);
-		assertThat(savedRefreshToken.getUser()).isEqualTo(user);
-		assertThat(savedRefreshToken.getFamily()).isEqualTo(1L);
+		assertThat(savedRefreshToken.getFamily()).isEqualTo(tokenFamily);
 		assertThat(savedRefreshToken.getCreationTimestamp().plus(refreshTokenProperties.getExpirationTime()))
 				.isEqualTo(savedRefreshToken.getExpirationTimestamp());
 	}
@@ -112,13 +71,15 @@ class RefreshTokenServiceTests {
 
 	@Test
 	void findRefreshTokenByValue_shouldReturnPersistedRefreshToken_whenTokenWithSpecifiedValueExists() {
-		User user = user().withId().build();
-
 		UUID refreshTokenValue = UUID.randomUUID();
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.user(user().withId().build())
+				.build();
+
 		RefreshToken persistedRefreshToken = RefreshToken.builder()
 				.value(refreshTokenValue)
-				.family(10L)
-				.user(user)
+				.family(tokenFamily)
 				.creationTimestamp(Instant.now())
 				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
 				.build();
@@ -145,95 +106,6 @@ class RefreshTokenServiceTests {
 
 
 		assertThat(foundRefreshTokenOptional).isEmpty();
-	}
-
-
-	@Test
-	void isRefreshTokenExpired_shouldReturnTrue_whenRefreshTokenHasExpired() {
-		RefreshToken refreshToken = RefreshToken.builder()
-				.value(UUID.randomUUID())
-				.family(10L)
-				.user(user().withId().build())
-				.creationTimestamp(Instant.now().minus(2, ChronoUnit.HOURS))
-				.expirationTimestamp(Instant.now().minus(1, ChronoUnit.HOURS))
-				.build();
-
-
-		boolean expired = refreshTokenService.isRefreshTokenExpired(refreshToken);
-
-
-		assertThat(expired).isTrue();
-	}
-
-	@Test
-	void isRefreshTokenExpired_shouldReturnFalse_whenRefreshTokenHasNotExpired() {
-		RefreshToken refreshToken = RefreshToken.builder()
-				.value(UUID.randomUUID())
-				.family(10L)
-				.user(user().withId().build())
-				.creationTimestamp(Instant.now())
-				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
-				.build();
-
-
-		boolean expired = refreshTokenService.isRefreshTokenExpired(refreshToken);
-
-
-		assertThat(expired).isFalse();
-	}
-
-
-	@Test
-	void findCurrentAllowedRefreshToken_shouldReturnLastRefreshTokenOfFamilyOptional_whenFamilyExists() {
-		User user = user().withId().build();
-		long family = 5L;
-
-		RefreshToken persistedLastTokenOfFamily = RefreshToken.builder()
-				.value(UUID.randomUUID())
-				.family(10L)
-				.user(user().withId().build())
-				.creationTimestamp(Instant.now())
-				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
-				.build();
-
-		given(refreshTokenRepository.findLastTokenOfUserTokenFamily(user, family))
-				.willReturn(Optional.of(persistedLastTokenOfFamily));
-
-
-		Optional<RefreshToken> currentAllowedTokenOptional =
-				refreshTokenService.findCurrentAllowedRefreshToken(user, family);
-
-
-		assertThat(currentAllowedTokenOptional).hasValue(persistedLastTokenOfFamily);
-	}
-
-	@Test
-	void findCurrentAllowedRefreshToken_shouldReturnEmptyOptional_whenFamilyDoesntExist() {
-		User user = user().withId().build();
-		long family = 5L;
-
-		given(refreshTokenRepository.findLastTokenOfUserTokenFamily(user, family))
-				.willReturn(Optional.empty());
-
-
-		Optional<RefreshToken> currentAllowedTokenOptional =
-				refreshTokenService.findCurrentAllowedRefreshToken(user, family);
-
-
-		assertThat(currentAllowedTokenOptional).isEmpty();
-	}
-
-
-	@Test
-	void invalidateUserRefreshTokenFamily_shouldDeleteAllRefreshTokensOfUserTokenFamily() {
-		User user = user().withId().build();
-		long family = 5L;
-
-
-		refreshTokenService.invalidateUserRefreshTokenFamily(user, family);
-
-
-		verify(refreshTokenRepository).deleteAllTokensOfUserTokenFamily(user, family);
 	}
 
 }

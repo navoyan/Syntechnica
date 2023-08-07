@@ -45,6 +45,8 @@ public class TestAccessTokenProvider {
 				.subject(user.getName())
 				.claim(accessTokenProperties.getClaims().getAuthorities(), authorities)
 				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getFamily(), 1L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 

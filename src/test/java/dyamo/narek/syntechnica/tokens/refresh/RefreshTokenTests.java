@@ -1,7 +1,7 @@
 package dyamo.narek.syntechnica.tokens.refresh;
 
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import dyamo.narek.syntechnica.users.TestUserBuilder;
-import dyamo.narek.syntechnica.users.User;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -29,12 +29,14 @@ class RefreshTokenTests {
 
 	@Test
 	void validateValue_shouldViolateConstraints_whenValueIsNull() {
-		User user = user().withId().build();
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken refreshToken = RefreshToken.builder()
 				.value(null)
-				.family(3L)
-				.user(user)
+				.family(tokenFamily)
 				.creationTimestamp(Instant.now())
 				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
 				.build();
@@ -47,11 +49,10 @@ class RefreshTokenTests {
 	}
 
 	@Test
-	void validateUser_shouldViolateConstraints_whenUserIsNull() {
+	void validateUser_shouldViolateConstraints_whenFamilyIsNull() {
 		RefreshToken refreshToken = RefreshToken.builder()
 				.value(UUID.randomUUID())
-				.family(3L)
-				.user(null)
+				.family(null)
 				.creationTimestamp(Instant.now())
 				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
 				.build();
@@ -65,12 +66,14 @@ class RefreshTokenTests {
 
 	@Test
 	void validateCreationTimestamp_shouldViolateConstraints_whenCreationTimestampIsNull() {
-		User user = user().withId().build();
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken refreshToken = RefreshToken.builder()
 				.value(UUID.randomUUID())
-				.family(3L)
-				.user(user)
+				.family(tokenFamily)
 				.creationTimestamp(null)
 				.expirationTimestamp(Instant.now().plus(1, ChronoUnit.HOURS))
 				.build();
@@ -84,12 +87,14 @@ class RefreshTokenTests {
 
 	@Test
 	void validateExpirationTimestamp_shouldViolateConstraints_whenExpirationTimestampIsNull() {
-		User user = user().withId().build();
+		var tokenFamily = TokenFamily.builder()
+				.id(1L)
+				.user(user().withId().build())
+				.build();
 
 		RefreshToken refreshToken = RefreshToken.builder()
 				.value(UUID.randomUUID())
-				.family(3L)
-				.user(user)
+				.family(tokenFamily)
 				.creationTimestamp(Instant.now())
 				.expirationTimestamp(null)
 				.build();

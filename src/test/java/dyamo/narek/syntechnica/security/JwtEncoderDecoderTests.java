@@ -29,7 +29,8 @@ import static org.assertj.core.api.Assertions.catchException;
 		webEnvironment = SpringBootTest.WebEnvironment.NONE,
 		classes = {
 				AuthConfiguration.class, KeyStoreConfiguration.class, TestAuthConfiguration.class,
-				KeyStoreProvider.class, VersionedJwtAuthenticationProvider.class,
+				KeyStoreProvider.class,
+				ValidFamilyJwtAuthenticationProvider.class, VersionedJwtAuthenticationProvider.class,
 				KeyStoreConfigurationProperties.class, AccessTokenConfigurationProperties.class
 		})
 @EnableConfigurationProperties
@@ -56,6 +57,8 @@ class JwtEncoderDecoderTests {
 				.subject("user")
 				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
 				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getFamily(), 1L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 		String encodedJwt = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -74,6 +77,8 @@ class JwtEncoderDecoderTests {
 				.subject("user")
 				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
 				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getFamily(), 1L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 		String encodedJwt = new PlainJWT(claims).serialize();
@@ -96,6 +101,8 @@ class JwtEncoderDecoderTests {
 				.subject("user")
 				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
 				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getFamily(), 1L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 		KeyPair foreignKeyPair = keyStoreProvider.generateRSAKeyPair(new SecureRandom());

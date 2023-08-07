@@ -26,8 +26,8 @@ import java.security.interfaces.RSAPublicKey;
 public class AuthConfiguration {
 
 	@Bean
-	public AuthenticationManager authenticationManager(VersionedJwtAuthenticationProvider provider) {
-		return new ProviderManager(provider);
+	public AuthenticationManager authenticationManager(ValidFamilyJwtAuthenticationProvider firstProviderInChain) {
+		return new ProviderManager(firstProviderInChain);
 	}
 
 	@Bean

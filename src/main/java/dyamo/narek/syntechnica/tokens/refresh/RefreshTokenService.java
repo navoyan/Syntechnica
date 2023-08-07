@@ -1,7 +1,6 @@
 package dyamo.narek.syntechnica.tokens.refresh;
 
-import dyamo.narek.syntechnica.users.User;
-import jakarta.validation.Valid;
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -19,14 +18,14 @@ public class RefreshTokenService {
 	private final RefreshTokenConfigurationProperties refreshTokenConfigurationProperties;
 
 
-	public @NonNull UUID createRefreshToken(@NonNull @Valid User user, long family) {
+	public @NonNull UUID createRefreshToken(TokenFamily family) {
 		UUID refreshTokenValue = UUID.randomUUID();
 
 		Instant now = Instant.now();
 		RefreshToken refreshToken = RefreshToken.builder()
 				.value(refreshTokenValue)
-				.user(user)
 				.family(family)
+				.generation(family.getLastGeneration())
 				.creationTimestamp(now)
 				.expirationTimestamp(now.plus(refreshTokenConfigurationProperties.getExpirationTime()))
 				.build();
@@ -36,28 +35,9 @@ public class RefreshTokenService {
 		return refreshTokenValue;
 	}
 
-	public @NonNull UUID createRefreshToken(@NonNull @Valid User user) {
-		long lastFamily = refreshTokenRepository.findLastTokenFamilyOfUser(user).orElse(0L);
-
-		return createRefreshToken(user, lastFamily + 1);
-	}
-
 
 	public Optional<RefreshToken> findRefreshTokenByValue(@NonNull UUID refreshTokenValue) {
 		return refreshTokenRepository.findById(refreshTokenValue);
-	}
-
-	public boolean isRefreshTokenExpired(@NonNull @Valid RefreshToken refreshToken) {
-		return refreshToken.getExpirationTimestamp().isBefore(Instant.now());
-	}
-
-
-	public Optional<RefreshToken> findCurrentAllowedRefreshToken(@NonNull User user, long family) {
-		return refreshTokenRepository.findLastTokenOfUserTokenFamily(user, family);
-	}
-
-	public void invalidateUserRefreshTokenFamily(@NonNull User user, long family) {
-		refreshTokenRepository.deleteAllTokensOfUserTokenFamily(user, family);
 	}
 
 }

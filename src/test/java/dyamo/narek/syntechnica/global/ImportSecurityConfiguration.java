@@ -16,7 +16,8 @@ import java.lang.annotation.Target;
 		SecurityConfiguration.class,
 		AuthConfiguration.class, KeyStoreConfiguration.class,
 		TestAuthConfiguration.class,
-		KeyStoreProvider.class, VersionedJwtAuthenticationProvider.class,
+		KeyStoreProvider.class,
+		ValidFamilyJwtAuthenticationProvider.class, VersionedJwtAuthenticationProvider.class,
 		ErrorResponseAuthenticationEntryPoint.class,
 		KeyStoreConfigurationProperties.class, AccessTokenConfigurationProperties.class
 })

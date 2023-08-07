@@ -1,6 +1,8 @@
 package dyamo.narek.syntechnica.tokens;
 
 import dyamo.narek.syntechnica.tokens.access.AccessTokenService;
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
+import dyamo.narek.syntechnica.tokens.family.TokenFamilyService;
 import dyamo.narek.syntechnica.tokens.refresh.InvalidRefreshTokenException;
 import dyamo.narek.syntechnica.tokens.refresh.ProhibitedRefreshTokenException;
 import dyamo.narek.syntechnica.tokens.refresh.RefreshToken;
@@ -21,6 +23,8 @@ public class TokenPairService {
 
 	private final UserService userService;
 
+	private final TokenFamilyService tokenFamilyService;
+
 	private final AccessTokenService accessTokenService;
 
 	private final RefreshTokenService refreshTokenService;
@@ -37,37 +41,40 @@ public class TokenPairService {
 			throw new InvalidCredentialsException("Invalid password");
 		}
 
+
+		TokenFamily newFamily = tokenFamilyService.createTokenFamily(user);
+
 		return new TokenPairResponse(
-				accessTokenService.createAccessToken(user),
-				refreshTokenService.createRefreshToken(user)
+				accessTokenService.createAccessToken(newFamily),
+				refreshTokenService.createRefreshToken(newFamily)
 		);
 	}
 
 	@Transactional(noRollbackFor = ProhibitedRefreshTokenException.class)
 	public @NonNull TokenPairResponse generateTokens(@NonNull UUID refreshTokenValue) {
 		RefreshToken providedRefreshToken = refreshTokenService.findRefreshTokenByValue(refreshTokenValue).orElseThrow(
-				() -> new InvalidRefreshTokenException("Refresh token not found")
+				() -> new InvalidRefreshTokenException("Refresh token not found, possibly invalidated or expired")
 		);
 
-		User user = providedRefreshToken.getUser();
-		long family = providedRefreshToken.getFamily();
+		TokenFamily family = providedRefreshToken.getFamily();
 
-		var currentAllowedRefreshToken = refreshTokenService.findCurrentAllowedRefreshToken(user, family).orElse(null);
-		if (!providedRefreshToken.equals(currentAllowedRefreshToken)) {
-			refreshTokenService.invalidateUserRefreshTokenFamily(user, family);
-			throw new ProhibitedRefreshTokenException("Prohibited refresh token");
+		if (!providedRefreshToken.isLastGeneration()) {
+			tokenFamilyService.invalidateTokenFamily(family);
+			throw new ProhibitedRefreshTokenException("Prohibited refresh token, already used");
 		}
 
-		if (refreshTokenService.isRefreshTokenExpired(providedRefreshToken)) {
+		if (providedRefreshToken.isExpired()) {
 			throw new InvalidRefreshTokenException(
 					"Refresh token expired at " + providedRefreshToken.getExpirationTimestamp()
 			);
 		}
 
 
+		tokenFamilyService.updateTokenFamilyLastGeneration(family);
+
 		return new TokenPairResponse(
-				accessTokenService.createAccessToken(user),
-				refreshTokenService.createRefreshToken(user, family)
+				accessTokenService.createAccessToken(family),
+				refreshTokenService.createRefreshToken(family)
 		);
 	}
 

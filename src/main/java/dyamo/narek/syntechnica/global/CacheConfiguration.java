@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class CacheConfiguration {
 
 	@Bean
-	public CacheManager accessTokenMetadataCacheManager(AccessTokenConfigurationProperties accessTokenProperties) {
+	public CacheManager tokenMetadataCacheManager(AccessTokenConfigurationProperties accessTokenProperties) {
 		var caffeine = Caffeine.newBuilder()
 				.expireAfterWrite(accessTokenProperties.getExpirationTime());
 

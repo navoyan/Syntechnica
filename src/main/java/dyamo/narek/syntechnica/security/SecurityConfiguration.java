@@ -33,7 +33,7 @@ public class SecurityConfiguration {
 				.csrf(CsrfConfigurer::disable)
 				.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> {
-					auth.requestMatchers("/tokens").permitAll();
+					auth.requestMatchers("/", "/tokens").permitAll();
 					auth.anyRequest().authenticated();
 				})
 				.oauth2ResourceServer(resourceServer -> {

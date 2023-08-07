@@ -24,6 +24,10 @@ public class AccessTokenConfigurationProperties {
 
 		private String version;
 
+		private String family;
+
+		private String generation;
+
 	}
 
 }

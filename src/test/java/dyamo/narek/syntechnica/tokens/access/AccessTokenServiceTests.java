@@ -1,5 +1,6 @@
 package dyamo.narek.syntechnica.tokens.access;
 
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import dyamo.narek.syntechnica.users.TestUserBuilder;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
@@ -61,6 +62,8 @@ class AccessTokenServiceTests {
 				authority().withType(UserAuthorityType.READ).withScope("*").build()
 		).build();
 
+		var tokenFamily = TokenFamily.builder().id(1L).user(user).build();
+
 		long tokenVersion = 5L;
 		var metadata = AccessTokenMetadata.builder()
 				.userId(user.getId()).user(user)
@@ -73,7 +76,7 @@ class AccessTokenServiceTests {
 		given(jwtMock.getTokenValue()).willReturn("ENCODED JWT");
 
 
-		accessTokenService.createAccessToken(user);
+		accessTokenService.createAccessToken(tokenFamily);
 
 
 		verify(jwtEncoder).encode(jwtEncoderParametersCaptor.capture());
@@ -87,6 +90,8 @@ class AccessTokenServiceTests {
 					user.getAuthorities().stream().map(UserAuthority::getAuthority).collect(Collectors.toList())
 			);
 			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getVersion())).isEqualTo(tokenVersion);
+			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getFamily())).isEqualTo(tokenFamily.getId());
+			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getGeneration())).isEqualTo(tokenFamily.getLastGeneration());
 		});
 	}
 
@@ -97,6 +102,8 @@ class AccessTokenServiceTests {
 				authority().withType(UserAuthorityType.READ).withScope("*").build()
 		).build();
 
+		var tokenFamily = TokenFamily.builder().id(1L).user(user).build();
+
 		given(accessTokenMetadataRepository.findById(user.getId())).willReturn(Optional.empty());
 
 		Jwt jwtMock = mock(Jwt.class);
@@ -104,7 +111,7 @@ class AccessTokenServiceTests {
 		given(jwtMock.getTokenValue()).willReturn("ENCODED JWT");
 
 
-		accessTokenService.createAccessToken(user);
+		accessTokenService.createAccessToken(tokenFamily);
 
 
 		verify(jwtEncoder).encode(jwtEncoderParametersCaptor.capture());
@@ -118,6 +125,8 @@ class AccessTokenServiceTests {
 					user.getAuthorities().stream().map(UserAuthority::getAuthority).collect(Collectors.toList())
 			);
 			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getVersion())).isEqualTo(1L);
+			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getFamily())).isEqualTo(tokenFamily.getId());
+			assertThat(claims.<Long>getClaim(accessTokenProperties.getClaims().getGeneration())).isEqualTo(tokenFamily.getLastGeneration());
 		});
 	}
 

@@ -1,8 +1,8 @@
 package dyamo.narek.syntechnica.tokens.access;
 
+import dyamo.narek.syntechnica.tokens.family.TokenFamily;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.NonNull;
@@ -26,7 +26,9 @@ public class AccessTokenService implements AccessTokenVersionProvider {
 	private final AccessTokenMetadataRepository accessTokenMetadataRepository;
 
 
-	public @NonNull String createAccessToken(@NonNull @Valid User user) {
+	public @NonNull String createAccessToken(@NonNull TokenFamily tokenFamily) {
+		User user = tokenFamily.getUser();
+
 		Instant issuedAt = Instant.now();
 		Instant expiresAt = issuedAt.plus(accessTokenProperties.getExpirationTime());
 
@@ -41,13 +43,15 @@ public class AccessTokenService implements AccessTokenVersionProvider {
 				.subject(user.getName())
 				.claim(accessTokenProperties.getClaims().getAuthorities(), authorities)
 				.claim(accessTokenProperties.getClaims().getVersion(), getAccessTokenCurrentVersion(user))
+				.claim(accessTokenProperties.getClaims().getFamily(), tokenFamily.getId())
+				.claim(accessTokenProperties.getClaims().getGeneration(), tokenFamily.getLastGeneration())
 				.build();
 
 
 		return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 	}
 
-	@Cacheable(cacheNames = "versions", cacheManager = "accessTokenMetadataCacheManager")
+	@Cacheable(cacheNames = "versions", cacheManager = "tokenMetadataCacheManager")
 	@Override
 	public long getAccessTokenCurrentVersion(@NonNull String username) {
 		return accessTokenMetadataRepository.findByUsername(username)
