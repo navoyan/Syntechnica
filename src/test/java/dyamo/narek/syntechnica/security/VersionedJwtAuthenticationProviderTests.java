@@ -1,7 +1,7 @@
 package dyamo.narek.syntechnica.security;
 
 import dyamo.narek.syntechnica.tokens.access.AccessTokenConfigurationProperties;
-import dyamo.narek.syntechnica.tokens.access.AccessTokenService;
+import dyamo.narek.syntechnica.tokens.access.AccessTokenVersionProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class VersionedJwtAuthenticationProviderTests {
 	@Mock
 	JwtAuthenticationProvider originalProvider;
 	@Mock
-	AccessTokenService accessTokenService;
+	AccessTokenVersionProvider accessTokenVersionProvider;
 
 	AccessTokenConfigurationProperties accessTokenProperties;
 
@@ -44,7 +44,7 @@ class VersionedJwtAuthenticationProviderTests {
 		accessTokenProperties = configProperties(AccessTokenConfigurationProperties.class);
 
 		authenticationProvider = new VersionedJwtAuthenticationProvider(
-				originalProvider, accessTokenService, accessTokenProperties
+				originalProvider, accessTokenVersionProvider, accessTokenProperties
 		);
 	}
 
@@ -52,6 +52,8 @@ class VersionedJwtAuthenticationProviderTests {
 	@Test
 	void authenticate_shouldReturnOriginallyProvidedAuthentication_whenVersionMatches() {
 		String username = "user";
+		long tokenVersion = 5L;
+
 		Authentication authentication = mock(Authentication.class);
 
 		JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -60,7 +62,8 @@ class VersionedJwtAuthenticationProviderTests {
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))
 				.subject(username)
 				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
-				.claim(accessTokenProperties.getClaims().getVersion(), 5L)
+				.claim(accessTokenProperties.getClaims().getVersion(), tokenVersion)
+				.claim(accessTokenProperties.getClaims().getFamily(), 10L)
 				.build();
 
 		Jwt jwt = new Jwt("ENCODED JWT",
@@ -70,7 +73,8 @@ class VersionedJwtAuthenticationProviderTests {
 		JwtAuthenticationToken authToken = new JwtAuthenticationToken(jwt);
 
 		given(originalProvider.authenticate(authentication)).willReturn(authToken);
-		given(accessTokenService.getAccessTokenCurrentVersion(username)).willReturn(5L);
+		given(accessTokenVersionProvider.getAccessTokenCurrentVersion(username))
+				.willReturn(tokenVersion);
 
 
 		Authentication resultAuthentication = authenticationProvider.authenticate(authentication);
@@ -82,6 +86,8 @@ class VersionedJwtAuthenticationProviderTests {
 	@Test
 	void authenticate_shouldThrowException_whenVersionDoesNotMatch() {
 		String username = "user";
+		long tokenVersion = 4L;
+
 		Authentication authentication = mock(Authentication.class);
 
 		JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -90,7 +96,9 @@ class VersionedJwtAuthenticationProviderTests {
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))
 				.subject(username)
 				.claim(accessTokenProperties.getClaims().getAuthorities(), List.of("ADMIN", "READ:*", "WRITE:*"))
-				.claim(accessTokenProperties.getClaims().getVersion(), 4L)
+				.claim(accessTokenProperties.getClaims().getVersion(), tokenVersion)
+				.claim(accessTokenProperties.getClaims().getFamily(), 10L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 		Jwt jwt = new Jwt("ENCODED JWT",
@@ -100,7 +108,7 @@ class VersionedJwtAuthenticationProviderTests {
 		JwtAuthenticationToken authToken = new JwtAuthenticationToken(jwt);
 
 		given(originalProvider.authenticate(authentication)).willReturn(authToken);
-		given(accessTokenService.getAccessTokenCurrentVersion(username)).willReturn(5L);
+		given(accessTokenVersionProvider.getAccessTokenCurrentVersion(username)).willReturn(5L);
 
 
 		Exception thrown = catchException(() -> {
@@ -110,4 +118,5 @@ class VersionedJwtAuthenticationProviderTests {
 
 		assertThat(thrown).isInstanceOf(InvalidBearerTokenException.class);
 	}
+
 }
