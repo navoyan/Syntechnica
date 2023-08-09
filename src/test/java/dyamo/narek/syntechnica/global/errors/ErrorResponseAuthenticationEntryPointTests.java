@@ -23,6 +23,9 @@ import static dyamo.narek.syntechnica.global.RestDocumentationProviders.docMockM
 import static dyamo.narek.syntechnica.global.RestDocumentationProviders.fullUri;
 import static dyamo.narek.syntechnica.global.errors.ErrorResponseResultMatchers.errorResponse;
 import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,6 +60,16 @@ class ErrorResponseAuthenticationEntryPointTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().exists())
 				.andExpect(errorResponse().path().value(fullUri(securedEndpoint)));
+
+
+		actions.andDo(document("error-unauthenticated",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, always `401` in this case"),
+						fieldWithPath("error").description("HTTP error that occurred, always `Unauthorized` in this case"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made")
+				)));
 	}
 
 	@Test

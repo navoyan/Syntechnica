@@ -30,6 +30,9 @@ import static dyamo.narek.syntechnica.global.RestDocumentationProviders.fullUri;
 import static dyamo.narek.syntechnica.global.errors.ErrorResponseResultMatchers.errorResponse;
 import static dyamo.narek.syntechnica.users.TestUserBuilder.user;
 import static dyamo.narek.syntechnica.users.authorities.TestUserAuthorityBuilder.authority;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(TestController.class)
@@ -65,6 +68,16 @@ class ErrorControllerAdviceTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().doesNotExist())
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("error-unresolved",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, always `500` in this case"),
+						fieldWithPath("error")
+								.description("HTTP error that occurred, always `Internal Server Error` in this case"),
+						fieldWithPath("path").description("Path to which the request was made")
+				)));
 	}
 
 	@Test
@@ -80,6 +93,16 @@ class ErrorControllerAdviceTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().value("ERROR"))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("error-permitted",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, e.g. `400`"),
+						fieldWithPath("error").description("HTTP error that occurred, e.g. `Bad Request`"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made")
+				)));
 	}
 
 	@Test
@@ -97,6 +120,17 @@ class ErrorControllerAdviceTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().value("Access Denied"))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("error-access-denied",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, always `403` in this case"),
+						fieldWithPath("error").description("HTTP error that occurred, always `Forbidden` in this case"),
+						fieldWithPath("message")
+								.description("Description of the cause of the error, always `Access Denied` in this case"),
+						fieldWithPath("path").description("Path to which the request was made")
+				)));
 	}
 
 	@Test
@@ -116,6 +150,16 @@ class ErrorControllerAdviceTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().exists())
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("error-validation",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, always `400` in this case"),
+						fieldWithPath("error").description("HTTP error that occurred, always `Bad Request` in this case"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made")
+				)));
 	}
 
 

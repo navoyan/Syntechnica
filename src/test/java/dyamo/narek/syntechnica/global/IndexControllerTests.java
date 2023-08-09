@@ -13,6 +13,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static dyamo.narek.syntechnica.global.RestDocumentationProviders.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -44,5 +49,15 @@ class IndexControllerTests {
 		actions.andExpect(jsonPath("$._links.self.href").value(baseUri()))
 				.andExpect(jsonPath("$._links.tokens.href")
 						.value(fullUri(linkTo(TokenController.class), "{?grant_type}")));
+
+
+		actions.andDo(document("index-access",
+				responseFields(
+						subsectionWithPath("_links").description("<<<resource_index_access_links, Links>> to other resources")
+				),
+				links(
+						linkWithRel("self").description("<<resource_index, Index>> resource"),
+						linkWithRel("tokens").description("<<resource_tokens, Tokens>> resource")
+				)));
 	}
 }

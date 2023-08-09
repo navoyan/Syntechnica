@@ -23,6 +23,12 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,6 +76,32 @@ class TokenControllerTests {
 				.andExpect(jsonPath("$._links.tokens.href")
 						.value(fullUri(linkTo(TokenController.class), "{?grant_type}")))
 				.andExpect(status().isOk());
+
+
+		actions.andDo(document("tokens-generate-credentials",
+				queryParameters(
+						parameterWithName("grant_type")
+								.description("Type of input data proving" +
+										" the presence of permission to receive tokens")
+				),
+				requestFields(
+						fieldWithPath("username").description("Name of the user"),
+						fieldWithPath("password").description("Password of the user")
+				),
+				responseFields(
+						fieldWithPath("accessToken")
+								.description("<<resource_tokens_info_access, Access token>> (JWT)" +
+										" passed as a bearer token to perform authorized requests"),
+						fieldWithPath("refreshToken")
+								.description("<<resource_tokens_info_refresh, Refresh token>>" +
+										" used to get new access token"),
+						subsectionWithPath("_links")
+								.description("<<resource_tokens_generate_credentials_links, Links>>" +
+										" to other resources")
+				),
+				links(
+						linkWithRel("tokens").description("<<resource_tokens, Tokens>> resource")
+				)));
 	}
 
 	@Test
@@ -92,6 +124,16 @@ class TokenControllerTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().value(exceptionMessage))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("tokens-generate-credentials-error-invalid-credentials",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, e.g. `400`"),
+						fieldWithPath("error").description("HTTP error that occurred, e.g. `Bad Request`"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made (`" + endpoint + "`)")
+				)));
 	}
 
 	@Test
@@ -111,6 +153,16 @@ class TokenControllerTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().value(startsWith("Validation failed")))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("tokens-generate-credentials-error-credentials-fail-validation",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, e.g. `400`"),
+						fieldWithPath("error").description("HTTP error that occurred, e.g. `Bad Request`"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made (`" + endpoint + "`)")
+				)));
 	}
 
 
@@ -141,6 +193,32 @@ class TokenControllerTests {
 				.andExpect(jsonPath("$._links.tokens.href")
 						.value(fullUri(linkTo(TokenController.class), "{?grant_type}")))
 				.andExpect(status().isOk());
+
+
+		actions.andDo(document("tokens-generate-refresh-token",
+				queryParameters(
+						parameterWithName("grant_type")
+								.description("Type of input data proving" +
+										" the presence of permission to receive tokens")
+				),
+				requestFields(
+						fieldWithPath("refreshToken")
+								.description("Last <<resource_tokens_info_refresh, refresh token>> received")
+				),
+				responseFields(
+						fieldWithPath("accessToken")
+								.description("<<resource_tokens_info_access, Access token>> (JWT) passed" +
+										" as a bearer token to perform authorized requests"),
+						fieldWithPath("refreshToken")
+								.description("<<resource_tokens_info_refresh, Refresh token>>" +
+										" used to get new access token"),
+						subsectionWithPath("_links")
+								.description("<<resource_tokens_generate_refresh_token_links, Links>>" +
+										" to other resources")
+				),
+				links(
+						linkWithRel("tokens").description("<<resource_tokens, Tokens>> resource")
+				)));
 	}
 
 	@Test
@@ -165,6 +243,16 @@ class TokenControllerTests {
 				.andExpect(errorResponse().validTimestamp())
 				.andExpect(errorResponse().message().value(exceptionMessage))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
+
+
+		actions.andDo(document("tokens-generate-refresh-token-error-invalid-refresh-token",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, e.g. `400`"),
+						fieldWithPath("error").description("HTTP error that occurred, e.g. `Bad Request`"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made (`" + endpoint + "`)")
+				)));
 	}
 
 	@Test
@@ -185,6 +273,15 @@ class TokenControllerTests {
 				.andExpect(errorResponse().message().value(startsWith("Validation failed")))
 				.andExpect(errorResponse().path().value(fullUri(endpoint)));
 
+
+		actions.andDo(document("tokens-generate-refresh-token-error-refresh-token-fails-validation",
+				responseFields(
+						fieldWithPath("timestamp").description("Error occurrence timestamp in ISO-8601 format"),
+						fieldWithPath("statusCode").description("HTTP status code, e.g. `400`"),
+						fieldWithPath("error").description("HTTP error that occurred, e.g. `Bad Request`"),
+						fieldWithPath("message").description("Description of the cause of the error"),
+						fieldWithPath("path").description("Path to which the request was made (`" + endpoint + "`)")
+				)));
 	}
 
 }
