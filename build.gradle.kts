@@ -12,7 +12,7 @@ version = "0.0.1"
 
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_20
+	sourceCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.bootBuildImage {
@@ -38,13 +38,13 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-hateoas")
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.bouncycastle:bcpkix-jdk18on:1.75")
 
+	runtimeOnly("org.postgresql:postgresql")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
 	implementation("org.flywaydb:flyway-core")
 
 	implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -52,30 +52,23 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-cache")
 	implementation("com.github.ben-manes.caffeine:caffeine")
 
-	implementation("org.springframework.boot:spring-boot-starter-integration")
-	implementation("org.springframework.integration:spring-integration-file")
-
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
 
-	asciiDoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
-
-
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-
-
-	runtimeOnly("org.postgresql:postgresql")
 
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 
+	asciiDoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
+
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("org.springframework.integration:spring-integration-test")
+
 	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 
 	testImplementation("org.testcontainers:junit-jupiter")
