@@ -1,0 +1,191 @@
+= Syntechnica API Guide
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+:operation-http-request-title: Example request
+:operation-http-response-title: Example response
+:operation-links-title: Hypermedia links
+
+[[overview]]
+= Overview
+
+
+[[overview_http_verbs]]
+== HTTP verbs
+
+Syntechnica tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PUT`
+| Used to completely replace an existing resource
+
+| `PATCH`
+| Used to update an existing resource, including partial updates
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+
+
+
+[[overview_http_status_codes]]
+== HTTP status codes
+
+Syntechnica tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's
+`Location` header
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+
+| `500 Internal Server Error`
+| The server encountered an unexpected condition
+that prevented it from fulfilling the request.
+|===
+
+
+
+
+[[overview_errors]]
+== Errors
+
+Whenever an error response (status code >= 400) is returned, the body will contain a JSON object
+that describes the problem. The error object has the following structure:
+
+include::{snippets}/error-permitted/response-fields.adoc[]
+
+IMPORTANT: Internal server errors (status code 500) have no messages
+so to not reveal internal details of the application state.
+
+
+For example, a request that attempts to generate a token pair using
+invalid credentials will produce a following response:
+
+include::{snippets}/tokens-generate-credentials-error-invalid-credentials/http-response.adoc[]
+
+
+
+[[overview_hypermedia]]
+== Hypermedia
+
+Syntechnica uses hypermedia and resources include links to other resources in their
+responses. Resource responses are in https://github.com/mikekelly/hal_specification[Hypertext
+Application Language (HAL)] format. Links can be found beneath the `_links` key.
+
+IMPORTANT: Users of the API *should not* create (hardcode) URIs themselves, instead they should use the above-described
+links to navigate from resource to resource.
+
+
+
+
+[[resources]]
+= Resources
+
+
+
+[[resource_index]]
+== Index
+
+The index provides the entry point into the service.
+
+
+[[resource_index_access]]
+=== Accessing the index
+
+A `GET` request is used to access the index
+
+operation::index-access[snippets='http-request,http-response,response-fields,links']
+
+
+
+
+[[resource_tokens]]
+== Tokens
+
+The Tokens resource is used to generate *refresh* and *access* token pairs for future authorized requests.
+
+
+[[resource_tokens_info_access]]
+=== Access tokens
+The access token is used to authorize the request by adding it to the `Authorization` HTTP header
+with the `Bearer` prefix: `Authorization: Bearer ENCODED_ACCESS_TOKEN`.
+
+*Only the last received* access token should be used.
+Otherwise, the access token and the refresh token of the current token pair
+will be *invalidated* for security purposes.
+
+
+[[resource_tokens_info_refresh]]
+=== Refresh tokens
+The refresh token is used to obtain new access token.
+
+Each refresh token must be used *only once*,
+then a newly received refresh token must be used to obtain new access token.
+Otherwise, the access token and the refresh token of the current token pair
+will be *invalidated* for security purposes.
+
+
+[[resource_tokens_info_security]]
+=== Token security
+Suppose a legitimate user uses the last access token received and does not reuse а refresh token,
+but has been denied to use one of that tokens.
+In that case, the tokens were probably also owned by the malicious user.
+Don't worry, the tokens owned by the legitimate user and the malicious user are invalidated,
+so the legitimate user just has to generate new tokens using his credentials.
+
+IMPORTANT: Access tokens *should not* be stored in Local Storage.
+Instead, store the access token in a
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#emulating_private_methods_with_closures[JavaScript closure]
+(emulating private method),
+and store the refresh token in Local Storage.
+Thanks to the fact that Syntechnica on the server side automatically determines the relevance of tokens,
+this will be the most secure solution.
+
+
+[[resource_tokens_generate]]
+=== Generating tokens
+
+The `POST` request is used to generate a token pair.
+
+
+This is the only operation currently supported for Tokens resource.
+
+
+[[resource_tokens_generate_credentials]]
+==== Generating using credentials
+
+operation::tokens-generate-credentials[snippets='request-fields,http-request,http-response,response-fields,links']
+
+
+[[resource_tokens_generate_refresh_tokens]]
+==== Generating using refresh token
+
+operation::tokens-generate-refresh-token[snippets='request-fields,http-request,http-response,response-fields,links']

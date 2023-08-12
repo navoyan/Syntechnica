@@ -1,14 +1,8 @@
 package dyamo.narek.syntechnica.global;
 
 import dyamo.narek.syntechnica.global.errors.ErrorResponseAuthenticationEntryPoint;
-import dyamo.narek.syntechnica.security.KeyStoreConfiguration;
-import dyamo.narek.syntechnica.security.KeyStoreConfigurationProperties;
-import dyamo.narek.syntechnica.security.KeyStoreProvider;
-import dyamo.narek.syntechnica.security.SecurityConfiguration;
-import dyamo.narek.syntechnica.security.auth.AuthConfiguration;
-import dyamo.narek.syntechnica.security.auth.TestAuthConfiguration;
-import dyamo.narek.syntechnica.security.auth.tokens.VersionedJwtAuthenticationProvider;
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
+import dyamo.narek.syntechnica.security.*;
+import dyamo.narek.syntechnica.tokens.access.AccessTokenConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -22,7 +16,8 @@ import java.lang.annotation.Target;
 		SecurityConfiguration.class,
 		AuthConfiguration.class, KeyStoreConfiguration.class,
 		TestAuthConfiguration.class,
-		KeyStoreProvider.class, VersionedJwtAuthenticationProvider.class,
+		KeyStoreProvider.class,
+		ValidFamilyJwtAuthenticationProvider.class, VersionedJwtAuthenticationProvider.class,
 		ErrorResponseAuthenticationEntryPoint.class,
 		KeyStoreConfigurationProperties.class, AccessTokenConfigurationProperties.class
 })

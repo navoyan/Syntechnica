@@ -15,6 +15,7 @@ public class TestUserBuilder {
 			.name("user" + userIndex)
 			.password(VALID_ENCODED_PASSWORD)
 			.authorities(new ArrayList<>())
+			.tokenFamilies(new ArrayList<>())
 			.build();
 
 

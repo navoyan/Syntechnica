@@ -1,8 +1,6 @@
 package dyamo.narek.syntechnica.global.errors;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,65 +11,55 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ErrorControllerAdvice {
 
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(Exception.class)
-	public EntityModel<ErrorResponse> handleUnresolvedException(HttpServletRequest request) {
-		String uri = getRequestUriBuilder(request).build().toUriString();
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorResponse handleUnresolvedException(HttpServletRequest request) {
+		URI path = getRequestUriBuilder(request).build().toUri();
 
-		return EntityModel.of(
-				new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR),
-				Link.of(uri).withSelfRel()
-		);
+		return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, path);
 	}
 
 	@ExceptionHandler(DefaultHandledException.class)
-	public ResponseEntity<EntityModel<ErrorResponse>> handlePermittedException(DefaultHandledException exception,
-																					HttpServletRequest request) {
-		String uri = getRequestUriBuilder(request).build().toUriString();
+	public ResponseEntity<ErrorResponse> handlePermittedException(DefaultHandledException exception,
+																  HttpServletRequest request) {
+		URI path = getRequestUriBuilder(request).build().toUri();
 
 		Throwable original = exception.getCause();
 		HttpStatus responseStatus = exception.getResponseStatus();
 
-		var errorResponseModel = EntityModel.of(
-				new ErrorResponse(responseStatus, original.getMessage()),
-				Link.of(uri).withSelfRel()
-		);
+		var errorResponse = new ErrorResponse(responseStatus, path, original.getMessage());
 
-		return new ResponseEntity<>(errorResponseModel, responseStatus);
+		return new ResponseEntity<>(errorResponse, responseStatus);
 	}
 
 
-	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(AccessDeniedException.class)
-	public EntityModel<ErrorResponse> handleAccessDeniedException(AccessDeniedException exception,
-																  HttpServletRequest request) {
-		String uri = getRequestUriBuilder(request).build().toUriString();
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ErrorResponse handleAccessDeniedException(AccessDeniedException exception,
+													 HttpServletRequest request) {
+		URI path = getRequestUriBuilder(request).build().toUri();
 
-		return EntityModel.of(
-				new ErrorResponse(HttpStatus.FORBIDDEN, exception.getMessage()),
-				Link.of(uri).withSelfRel()
-		);
+		return new ErrorResponse(HttpStatus.FORBIDDEN, path, exception.getMessage());
 	}
 
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public EntityModel<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
-		String uri = getRequestUriBuilder(request).build().toUriString();
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleValidationException(MethodArgumentNotValidException exception,
+												   HttpServletRequest request) {
+		URI path = getRequestUriBuilder(request).build().toUri();
 
 		String message = "Validation failed for: "
 				+ exception.getBindingResult().getFieldErrors().stream()
 				.map(error -> error.getField() + " (" + error.getDefaultMessage() + ")")
 				.collect(Collectors.joining(", "));
 
-		return EntityModel.of(
-				new ErrorResponse(HttpStatus.BAD_REQUEST, message),
-				Link.of(uri).withSelfRel()
-		);
+		return new ErrorResponse(HttpStatus.BAD_REQUEST, path, message);
 	}
 
 

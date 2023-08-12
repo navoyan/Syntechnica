@@ -1,6 +1,6 @@
 package dyamo.narek.syntechnica.global;
 
-import dyamo.narek.syntechnica.security.auth.tokens.access.AccessTokenConfigurationProperties;
+import dyamo.narek.syntechnica.tokens.access.AccessTokenConfigurationProperties;
 import dyamo.narek.syntechnica.users.User;
 import dyamo.narek.syntechnica.users.authorities.UserAuthority;
 import jakarta.validation.Valid;
@@ -45,6 +45,8 @@ public class TestAccessTokenProvider {
 				.subject(user.getName())
 				.claim(accessTokenProperties.getClaims().getAuthorities(), authorities)
 				.claim(accessTokenProperties.getClaims().getVersion(), 1L)
+				.claim(accessTokenProperties.getClaims().getFamily(), 1L)
+				.claim(accessTokenProperties.getClaims().getGeneration(), 1L)
 				.build();
 
 

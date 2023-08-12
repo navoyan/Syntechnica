@@ -3,29 +3,23 @@ package dyamo.narek.syntechnica.global.errors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.config.HypermediaMappingInformation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URI;
 
 @Component
+@RequiredArgsConstructor
 public class ErrorResponseAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
 	private final ObjectMapper objectMapper;
-
-
-	public ErrorResponseAuthenticationEntryPoint(ObjectMapper objectMapper,
-												 HypermediaMappingInformation halMediaTypeConfiguration) {
-		this.objectMapper = halMediaTypeConfiguration.configureObjectMapper(objectMapper.copy());
-	}
 
 
 	@Override
@@ -33,16 +27,13 @@ public class ErrorResponseAuthenticationEntryPoint implements AuthenticationEntr
 						 HttpServletResponse response,
 						 AuthenticationException authException) throws IOException {
 		HttpStatus status = HttpStatus.UNAUTHORIZED;
-		String uri = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
+		URI path = ServletUriComponentsBuilder.fromRequest(request).build().toUri();
 
-		EntityModel<ErrorResponse> errorResponseModel = EntityModel.of(
-				new ErrorResponse(status, authException.getMessage()),
-				Link.of(uri).withSelfRel()
-		);
+		ErrorResponse errorResponse = new ErrorResponse(status, path, authException.getMessage());
 
 		response.setStatus(status.value());
-		response.addHeader(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE);
-		objectMapper.writeValue(response.getOutputStream(), errorResponseModel);
+		response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		objectMapper.writeValue(response.getOutputStream(), errorResponse);
 	}
 
 }
