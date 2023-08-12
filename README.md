@@ -10,7 +10,7 @@ This is the repository of the Syntechnica server-side application.
 It will provide a RESTful (almost entirely) WEB API to interact with the application's domain.
 
 
-## [API Guide](https://dyam0.github.io/Syntechnica/api-guide.html)
+## [API Guide](https://navoyan.github.io/Syntechnica/api-guide.html)
 
 
 ## Running the application
@@ -57,7 +57,7 @@ In this case, just wait a while and try again.
     To implement a RESTful API with support for hypermedia links.
 - Security
   - [Spring Security](https://spring.io/projects/spring-security) - 
-    To implement a client authentication/authorization and API access control.
+    To control access to different parts of the application.
   - [Spring Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server) - 
     To implement Bearer JWT token authentication and authorization.
   - [Bouncy Castle](https://www.bouncycastle.org/java.html) - For advanced cryptographic purposes, 
@@ -79,6 +79,6 @@ In this case, just wait a while and try again.
 - Auxiliary libraries
   - [Lombok](https://projectlombok.org/) - To reduce boilerplate code.
   - [Hibernate Validator](https://hibernate.org/validator/) -
-  To validate the transferred objects for compliance with the specified constraints
+  To validate the passed objects for compliance with the specified constraints
 - Auxiliary tools
   - [Docker Compose](https://docs.docker.com/compose/) - To containerize required external applications.
